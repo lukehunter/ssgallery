@@ -6,6 +6,10 @@ import (
 	"github.com/urfave/cli"
     //"github.com/disintegration/imaging"
     "errors"
+    "path"
+    "path/filepath"
+    "strings"
+    "net/http"
 )
 
 const namearg string = "name"
@@ -18,6 +22,8 @@ const thumbheightarg string = "thumbheight"
 const viewerwidtharg string = "viewerwidth"
 const viewerheightarg string = "viewerheight"
 const testarg string = "test"
+
+const thumbnail = "thumbnail.jpg"
 
 var options Options
 var gallery Gallery
@@ -120,7 +126,24 @@ func BuildGallery() {
         albums: []Album {},
     }
 
-    path.
+    dirList := getDirList(options.source)
+
+    for _,album := range dirList {
+        // does base() work?
+        curAlbum := Album { name: filepath.Base(album), folder: album, images: []Image{}}
+        files := getFileList(album)
+
+        for _,image := range files {
+            if strings.Contains(image, thumbnail) {
+                continue
+            }
+
+            curImage := Image { name: fileNameWithoutExtension(image), path: image }
+            append(curAlbum.images, curImage)
+        }
+
+        append(gallery.albums, curAlbum)
+    }
 }
 
 func CopyResources() {
