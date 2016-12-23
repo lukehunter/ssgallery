@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 	"github.com/urfave/cli"
-    "github.com/disintegration/imaging"
+    //"github.com/disintegration/imaging"
+    "errors"
 )
 
 const namearg string = "name"
@@ -18,8 +19,12 @@ const viewerwidtharg string = "viewerwidth"
 const viewerheightarg string = "viewerheight"
 const testarg string = "test"
 
+var options Options
+var gallery Gallery
+
 func average(xs []float64) float64 {
 	panic("Not Implemented")
+    return 1.0;
 }
 
 func main() {
@@ -29,68 +34,54 @@ func main() {
 
 	//var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
 
-	var name string
-	var source string
-	var target string
-	var baseurl string
-	var disqus string
-	var thumbwidth int
-	var thumbheight int
-	var viewerwidth int
-	var viewerheight int
-    var test string
+    options = Options{}
 
 	app.Flags = []cli.Flag {
 		cli.StringFlag{
 			Name: namearg,
 			Usage: "Set gallery name to `NAME`",
-			Destination: &name,
+			Destination: &options.name,
 		},
 		cli.StringFlag{
 			Name: sourcearg,
 			Usage: "Read albums from `FOLDER`",
-			Destination: &source,
+			Destination: &options.source,
 		},
 		cli.StringFlag{
 			Name: targetarg,
 			Usage: "Write web page to `FOLDER`",
-			Destination: &target,
+			Destination: &options.target,
 		},
 		cli.StringFlag{
 			Name: baseurlarg,
 			Usage: "Gallery will be hosted at http://server/`REL_URL`",
-			Destination: &baseurl,
+			Destination: &options.baseurl,
 		},
 		cli.StringFlag{
 			Name: disqusarg,
 			Usage: "[Optional] Custom `URL` for disqus topic (go to disqus.com to get one)",
-			Destination: &disqus,
+			Destination: &options.disqus,
 		},
 		cli.IntFlag{
 			Name: thumbwidtharg,
 			Usage: "Set max thumbnail width to `WIDTH`",
-			Destination: &thumbwidth,
+			Destination: &options.thumbwidth,
 		},
 		cli.IntFlag{
 			Name: thumbheightarg,
 			Usage: "Set max thumbnail height to `HEIGHT`",
-			Destination: &thumbheight,
+			Destination: &options.thumbheight,
 		},
 		cli.IntFlag{
 			Name: viewerwidtharg,
 			Usage: "Set max image viewer width to `WIDTH`",
-			Destination: &viewerwidth,
+			Destination: &options.viewerwidth,
 		},
 		cli.IntFlag{
 			Name: viewerheightarg,
 			Usage: "Set max image viewer height to `HEIGHT`",
-			Destination: &viewerheight,
+			Destination: &options.viewerheight,
 		},
-        cli.StringFlag{
-            Name: testarg,
-            Usage: "Testing",
-            Destination: &test,
-        },
 	}
 
     i := Image { name: "image_test", path: "path" }
@@ -106,22 +97,34 @@ func main() {
 		//}
 
 		fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
-			name, source, target, baseurl, disqus, thumbwidth, thumbheight, viewerwidth, viewerheight)
+			options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth, options.thumbheight, options.viewerwidth, options.viewerheight)
 
-        image, err := imaging.Open(test);
-
-        if err != nil {
-            panic(err)
-        }
-
-        fmt.Printf("%d x %d\n", image.Bounds().Size().X, image.Bounds().Size().Y)
-
-        resized := imaging.Fit(image, thumbwidth, thumbheight, imaging.Bartlett)
-
-        imaging.Save(resized, fmt.Sprintf("%s-resized.jpg", test));
+        BuildGallery()
+        CopyResources()
+        PopulateImageCache()
+        CreatePages()
 
 		return nil
 	}
 
 	app.Run(os.Args)
 }
+
+func BuildGallery() {
+    if exists, _ := exists(options.source); !exists {
+        panic(errors.New(fmt.Sprintf("could not find path %s", options.source)))
+    }
+
+    gallery = Gallery {
+        name: options.name,
+        albums: []Album {},
+    }
+
+    path.
+}
+
+func CopyResources() {
+    _ = os.Mkdir(options.target, 0644)
+    RestoreAssets(options.target, "data")
+}
+

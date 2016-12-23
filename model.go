@@ -4,6 +4,11 @@ import (
     "path"
 )
 
+type Options struct {
+    name, source, target, baseurl, disqus string
+    thumbwidth, thumbheight, viewerwidth, viewerheight int
+}
+
 type Image struct {
     name, path string
     width, height int
