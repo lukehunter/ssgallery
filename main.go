@@ -16,10 +16,14 @@ const thumbheightarg string = "thumbheight"
 const viewerwidtharg string = "viewerwidth"
 const viewerheightarg string = "viewerheight"
 
+func average(xs []float64) float64 {
+	panic("Not Implemented")
+}
+
 func main() {
 	app := cli.NewApp()
-	app.Name = "gogallery"
-	app.Usage = "use it good"
+	app.Name = "ssgallery"
+	app.Usage = "stupidly simple gallery"
 
 	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
 
@@ -81,13 +85,11 @@ func main() {
 		},
 	}
 
-	//sort.Sort(cli.FlagsByName(app.Flags))
-
 	app.Action = func(c *cli.Context) error {
 		for _,arg := range args {
 			if (!c.IsSet(arg)) {
 				cli.ShowAppHelp(c)
-				return cli.NewExitError(fmt.Sprintf("\n\narg %s is required", arg), 1)
+				return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
 			}
 		}
 

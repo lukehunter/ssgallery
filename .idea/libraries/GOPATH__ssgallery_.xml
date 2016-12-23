@@ -33,6 +33,7 @@
       <root url="file://C:/Go/src/expvar" />
       <root url="file://C:/Go/src/flag" />
       <root url="file://C:/Go/src/log" />
+      <root url="file://$PROJECT_DIR$/../../../ssgallery" />
       <root url="file://C:/Go/src/unsafe" />
       <root url="file://C:/Go/src/database" />
       <root url="file://C:/Go/src/strings" />
@@ -46,7 +47,6 @@
       <root url="file://C:/Go/src/bytes" />
       <root url="file://C:/Go/src/time" />
       <root url="file://C:/Go/src/container" />
-      <root url="file://$PROJECT_DIR$/../../../gogallery" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
@@ -82,6 +82,7 @@
       <root url="file://C:/Go/src/expvar" />
       <root url="file://C:/Go/src/flag" />
       <root url="file://C:/Go/src/log" />
+      <root url="file://$PROJECT_DIR$/../../../ssgallery" />
       <root url="file://C:/Go/src/unsafe" />
       <root url="file://C:/Go/src/database" />
       <root url="file://C:/Go/src/strings" />
@@ -95,7 +96,6 @@
       <root url="file://C:/Go/src/bytes" />
       <root url="file://C:/Go/src/time" />
       <root url="file://C:/Go/src/container" />
-      <root url="file://$PROJECT_DIR$/../../../gogallery" />
     </SOURCES>
     <excluded>
       <root url="file://$PROJECT_DIR$" />
