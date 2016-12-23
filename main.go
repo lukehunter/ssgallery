@@ -116,7 +116,7 @@ func main() {
 
         fmt.Printf("%d x %d\n", image.Bounds().Size().X, image.Bounds().Size().Y)
 
-        resized := imaging.Thumbnail(image, thumbwidth, thumbheight, imaging.Lanczos)
+        resized := imaging.Fit(image, thumbwidth, thumbheight, imaging.Bartlett)
 
         imaging.Save(resized, fmt.Sprintf("%s-resized.jpg", test));
 
