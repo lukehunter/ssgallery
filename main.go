@@ -10,35 +10,32 @@ import (
     "path/filepath"
     "strings"
     "net/http"
+	"github.com/disintegration/imaging"
 )
 
-const namearg string = "name"
-const sourcearg string = "source"
-const targetarg string = "target"
-const baseurlarg string = "baseurl"
-const disqusarg string = "disqus"
-const thumbwidtharg string = "thumbwidth"
-const thumbheightarg string = "thumbheight"
-const viewerwidtharg string = "viewerwidth"
-const viewerheightarg string = "viewerheight"
-const testarg string = "test"
+const namearg = "name"
+const sourcearg = "source"
+const targetarg = "target"
+const baseurlarg = "baseurl"
+const disqusarg = "disqus"
+const thumbwidtharg = "thumbwidth"
+const thumbheightarg = "thumbheight"
+const viewerwidtharg = "viewerwidth"
+const viewerheightarg = "viewerheight"
 
 const thumbnail = "thumbnail.jpg"
+const cacheFolder = "cache"
+const filemode = 0644
 
 var options Options
 var gallery Gallery
-
-func average(xs []float64) float64 {
-	panic("Not Implemented")
-    return 1.0;
-}
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "ssgallery"
 	app.Usage = "stupidly simple gallery"
 
-	//var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
+	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
 
     options = Options{}
 
@@ -95,15 +92,17 @@ func main() {
     fmt.Printf("%s", i.name)
 
 	app.Action = func(c *cli.Context) error {
-		//for _,arg := range args {
-		//	if (!c.IsSet(arg)) {
-		//		cli.ShowAppHelp(c)
-		//		return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
-		//	}
-		//}
+		for _,arg := range args {
+			if (!c.IsSet(arg)) {
+				cli.ShowAppHelp(c)
+				return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
+			}
+		}
 
-		fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
-			options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth, options.thumbheight, options.viewerwidth, options.viewerheight)
+		fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'" +
+					"\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
+			options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
+			options.thumbheight, options.viewerwidth, options.viewerheight)
 
         BuildGallery()
         CopyResources()
@@ -147,7 +146,97 @@ func BuildGallery() {
 }
 
 func CopyResources() {
-    _ = os.Mkdir(options.target, 0644)
+    _ = os.Mkdir(options.target, filemode)
     RestoreAssets(options.target, "data")
 }
+
+func PopulateImageCache() {
+	for _,album := range gallery.albums {
+		os.Mkdir(path.Join(options.target, album.name, cacheFolder), filemode)
+
+		fmt.Printf("Caching album: %s", album.name)
+
+		for _,image := range album.images {
+			Copy(image.path, path.Join(options.target, album.name, path.Base(image.path)))
+
+			resize := func(width, height int) {
+				path := path.Join(options.target, album.name, cacheFolder,
+					formatFilename(image.name, width, height))
+				SaveResizedImage(image, width, height, path, true)
+			}
+
+			// image thumbnail
+			resize(options.thumbwidth, options.thumbheight)
+
+			// image viewer
+			resize(options.viewerwidth, options.viewerheight)
+		}
+
+		albumThumbnailPath := path.Join(album.folder, thumbnail)
+		targetAlbumThumbnailPath := path.Join(options.target, album.name, thumbnail)
+
+		// Always generate album thumbnail -- otherwise if thumbnail.jpg is removed from source it will never be re-generated
+		if exists(albumThumbnailPath) {
+			SaveResizedImage(Image{name: fmt.Sprintf("%s thumbnail", album.name), path: albumThumbnailPath},
+				options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
+		} else {
+			image := album.images[0]
+			fmt.Printf("File %s not found, using %s as album thumbnail", albumThumbnailPath, image.path)
+			SaveResizedImage(image, options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
+		}
+	}
+}
+
+func SaveResizedImage(image *Image, width, height int, filename string, skipIfNewer bool) {
+	printErr := func(err error) {
+		fmt.Printf("SaveRezisedImage unexpected error: %s", err.Error())
+	}
+
+	if skipIfNewer && exists(filename) {
+		imageInfo, err := os.Stat(image.path)
+		if err != nil {
+			printErr(err)
+			return
+		}
+		existingInfo, err := os.Stat(filename)
+		if err != nil {
+			printErr(err)
+			return
+		}
+
+		if imageInfo.ModTime() <= existingInfo.ModTime() {
+			// Still need to read the actual width and height for building html
+			existingThumb, err := imaging.Open(filename);
+
+			if err != nil {
+				printErr(err)
+				return
+			}
+
+			image.width = existingThumb.Bounds().Size().X
+			image.height = existingThumb.Bounds().Size().Y
+
+			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source", path.Base(filename))
+			return
+		}
+	}
+
+	fmt.Printf("Generating %dx%d for %s", width, height, image.name)
+
+	img, err := imaging.Open(image.path)
+
+	if err != nil {
+		printErr(err)
+		return
+	}
+
+	imaging.Fit(img, width, height, imaging.Lanczos)
+
+	image.width = img.Bounds().Size().X
+	image.height = img.Bounds().Size().Y
+
+	imaging.Save(img, filename)
+}
+
+
 

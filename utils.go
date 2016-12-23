@@ -4,6 +4,8 @@ import (
     "os"
     "path/filepath"
     "strings"
+    "io"
+    "fmt"
 )
 
 // exists returns whether the given file or directory exists or not
@@ -55,4 +57,21 @@ func fileNameWithoutExtension(path string) string {
     basename := strings.TrimSuffix(filename, filepath.Ext(filename))
 
     return basename
+}
+
+func Copy(dst, src string) error {
+    in, err := os.Open(src)
+    if err != nil { return err }
+    defer in.Close()
+    out, err := os.Create(dst)
+    if err != nil { return err }
+    defer out.Close()
+    _, err = io.Copy(out, in)
+    cerr := out.Close()
+    if err != nil { return err }
+    return cerr
+}
+
+func formatFilename(imagename string, width, height int) string {
+    return fmt.Sprintf("%s_%d_%d.jpg", imagename, width, height)
 }
