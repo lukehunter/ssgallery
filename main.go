@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/urfave/cli"
+    "github.com/disintegration/imaging"
 )
 
 const namearg string = "name"
@@ -15,6 +16,7 @@ const thumbwidtharg string = "thumbwidth"
 const thumbheightarg string = "thumbheight"
 const viewerwidtharg string = "viewerwidth"
 const viewerheightarg string = "viewerheight"
+const testarg string = "test"
 
 func average(xs []float64) float64 {
 	panic("Not Implemented")
@@ -25,7 +27,7 @@ func main() {
 	app.Name = "ssgallery"
 	app.Usage = "stupidly simple gallery"
 
-	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
+	//var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
 
 	var name string
 	var source string
@@ -36,6 +38,7 @@ func main() {
 	var thumbheight int
 	var viewerwidth int
 	var viewerheight int
+    var test string
 
 	app.Flags = []cli.Flag {
 		cli.StringFlag{
@@ -83,18 +86,40 @@ func main() {
 			Usage: "Set max image viewer height to `HEIGHT`",
 			Destination: &viewerheight,
 		},
+        cli.StringFlag{
+            Name: testarg,
+            Usage: "Testing",
+            Destination: &test,
+        },
 	}
 
+    i := Image { name: "image_test", path: "path" }
+
+    fmt.Printf("%s", i.name)
+
 	app.Action = func(c *cli.Context) error {
-		for _,arg := range args {
-			if (!c.IsSet(arg)) {
-				cli.ShowAppHelp(c)
-				return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
-			}
-		}
+		//for _,arg := range args {
+		//	if (!c.IsSet(arg)) {
+		//		cli.ShowAppHelp(c)
+		//		return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
+		//	}
+		//}
 
 		fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
 			name, source, target, baseurl, disqus, thumbwidth, thumbheight, viewerwidth, viewerheight)
+
+        image, err := imaging.Open(test);
+
+        if err != nil {
+            panic(err)
+        }
+
+        fmt.Printf("%d x %d\n", image.Bounds().Size().X, image.Bounds().Size().Y)
+
+        resized := imaging.Thumbnail(image, thumbwidth, thumbheight, imaging.Lanczos)
+
+        imaging.Save(resized, fmt.Sprintf("%s-resized.jpg", test));
+
 		return nil
 	}
 

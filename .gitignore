@@ -1,3 +1,16 @@
+ssgallery_darwin_386
+ssgallery_darwin_amd64
+ssgallery_freebsd_386
+ssgallery_freebsd_amd64
+ssgallery_freebsd_arm
+ssgallery_linux_386
+ssgallery_linux_amd64
+ssgallery_linux_arm
+ssgallery_netbsd_386
+ssgallery_netbsd_amd64
+ssgallery_netbsd_arm
+ssgallery_openbsd_386
+ssgallery_openbsd_amd64
 ssgallery_go_darwin_amd64
 .idea
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
