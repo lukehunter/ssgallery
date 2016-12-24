@@ -13,6 +13,7 @@ import (
     "path"
     "crypto/md5"
     "encoding/hex"
+    "bytes"
 )
 
 const namearg = "name"
@@ -32,6 +33,7 @@ const filemode = 0644
 
 var options Options
 var gallery Gallery
+var filesTouched int
 
 func main() {
 	app := cli.NewApp()
@@ -121,6 +123,8 @@ func main() {
         CopyResources()
         PopulateImageCache()
         CreatePages()
+
+        fmt.Printf("%d files touched (not including contents of %s)", filesTouched, filepath.Join(options.target, "data"))
 
 		return nil
 	}
@@ -281,11 +285,37 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 	image.width = img.Bounds().Size().X
 	image.height = img.Bounds().Size().Y
 
+    if fileExists {
+        buf := new(bytes.Buffer)
+        err = imaging.Encode(buf, img, imaging.JPEG)
+
+        if err != nil {
+            printErr(err)
+            return
+        }
+
+        existingHash, err := hash_file_md5(filename)
+
+        if err != nil {
+            printErr(err)
+            return
+        }
+
+        resizedHash := md5.Sum(buf.Bytes())
+
+        if existingHash == resizedHash {
+            fmt.Printf("Skipping album thumbnail, generated thumbnail has same md5sum as %s\n", filename)
+            return
+        }
+    }
+
 	err = imaging.Save(img, filename)
 
     if err != nil {
         printErr(err)
     }
+
+    filesTouched++
 }
 
 func CreatePages() {

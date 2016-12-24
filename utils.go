@@ -59,6 +59,17 @@ func fileNameWithoutExtension(path string) string {
 }
 
 func Copy(src, dst string) error {
+    inHash, err := hash_file_md5(src)
+    if err != nil { return err }
+
+    outHash, err := hash_file_md5(dst)
+    if err != nil { return err }
+
+    if inHash == outHash {
+        fmt.Printf("Skipping copy, %s has same md5sum as %s", src, dst)
+        return nil
+    }
+
     in, err := os.Open(src)
     if err != nil { return err }
     defer in.Close()
@@ -72,6 +83,8 @@ func Copy(src, dst string) error {
     _, err = io.Copy(out, in)
     cerr := out.Close()
     if err != nil { return err }
+
+    filesTouched++;
 
     return cerr
 }

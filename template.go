@@ -91,6 +91,8 @@ func (t *Template) RenderHtml(filename string) {
     err := ioutil.WriteFile(filename, renderedBytes, 0644)
 
     check(err)
+
+    filesTouched++
 }
 
 func (t *Template) RenderItems() string {
