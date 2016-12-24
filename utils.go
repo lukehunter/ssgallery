@@ -67,7 +67,7 @@ func Copy(src, dst string) error {
     if err != nil { return err }
     defer out.Close()
 
-    fmt.Printf("Copying %s to %s", src, dst)
+    fmt.Printf("Copying %s to %s\n", src, dst)
 
     _, err = io.Copy(out, in)
     cerr := out.Close()

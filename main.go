@@ -206,14 +206,10 @@ func PopulateImageCache() {
 			}
 
 			// image thumbnail
-			fmt.Printf("1 iw:%d ih:%d\n", image.width, image.height)
 			resize(options.thumbwidth, options.thumbheight)
-			fmt.Printf("2 iw:%d ih:%d\n", image.width, image.height)
 
 			// image viewer
-			fmt.Printf("3 iw:%d ih:%d\n", image.width, image.height)
 			resize(options.viewerwidth, options.viewerheight)
-			fmt.Printf("4 iw:%d ih:%d\n", image.width, image.height)
 		}
 
 		albumThumbnailPath := filepath.Join(album.folder, thumbnail)
@@ -262,7 +258,7 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 			image.width = existingThumb.Bounds().Size().X
 			image.height = existingThumb.Bounds().Size().Y
 
-			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source\n", path.Base(filename))
+			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source)\n", path.Base(filename))
 			return
 		}
 	}
@@ -297,11 +293,9 @@ func CreatePages() {
 		"SSG_DISQUS_URL": options.disqus,
 	}
 
-	fmt.Printf("--rendering html for gallery '%s'\n", gallery.name)
 	galleryTemplate.AddValues(galleryValues);
 
 	for _,album := range gallery.albums {
-		fmt.Printf("--rendering html for album '%s'\n", album.name)
 		albumThumb := filepath.Join(options.target, album.name, thumbnail)
 		albumThumbImg, err := imaging.Open(albumThumb)
 
@@ -325,7 +319,6 @@ func CreatePages() {
 		galleryTemplate.AddItem(TemplateItem{tag: "SSG_ALBUM_LIST_ITEM", values: albumValues})
 
 		for i,image := range album.images {
-			fmt.Printf("--rendering html for image '%s'\n", image.name)
 			imageTemplate := NewTemplate(imageTemplateRaw)
 
 			var nextPage, prevPage, picToPreload string
