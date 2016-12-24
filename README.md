@@ -108,7 +108,6 @@ Disqus identifies comment pages using a page identifier and/or a page url (see: 
   - improve alignment
 - fix css to work with custom thumbnail sizes
 - download gallery/album links and zip files
-- disable disqus if no url provided
 - remove extraneous files during generation (..hmm, yes/no/all warning?)
 - support nested albums
 - password protected albums
