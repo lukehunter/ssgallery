@@ -23,23 +23,27 @@ func check(e error) {
 }
 
 func getDirList(path string) []string {
-    return getItemList(path, true, false)
+    return getItemList(path, false, true, false, false)
 }
 
 func getFileList(path string) []string {
-    return getItemList(path, false, true)
+    return getItemList(path, false, false, true, false)
 }
 
-func getItemList(path string, includeDirs bool, includeFiles bool) []string {
+func getItemList(path string, includeSelf, includeDirs, includeFiles, recursive bool) []string {
     itemList := []string{}
 
     err := filepath.Walk(path, func(curPath string, fi os.FileInfo, err error) error {
-        if includeDirs && fi.IsDir() && curPath != path {
-            itemList = append(itemList, curPath)
-        }
+        checkDir := includeDirs && fi.IsDir()
+        checkSelf := includeSelf && curPath == path
+        checkFile := includeFiles && !fi.IsDir()
+        recurse := recursive || filepath.Dir(curPath) == path
 
-        if includeFiles && !fi.IsDir() {
+        if (checkSelf || checkDir || checkFile) && recurse {
+            printlnIfTrue(fmt.Sprintf("Walk: Include %s", curPath), options.debug)
             itemList = append(itemList, curPath)
+        } else {
+            printlnIfTrue(fmt.Sprintf("Walk: Exclude %s", curPath), options.debug)
         }
 
         return nil
@@ -64,9 +68,11 @@ func Copy(src, dst string) error {
 
     outHash, outErr := hash_file_md5(dst)
 
-    if outErr != nil && inHash == outHash {
+    if outErr == nil && inHash == outHash {
         fmt.Printf("Skipping copy, %s has same md5sum as %s", src, dst)
         return nil
+    } else if outErr != nil {
+        fmt.Printf("Couldn't read hash for %s (%s), will attempt to copy", dst, outErr.Error())
     }
 
     in, err := os.Open(src)

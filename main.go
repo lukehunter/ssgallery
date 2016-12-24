@@ -11,6 +11,7 @@ import (
     "path"
     "crypto/md5"
     "bytes"
+    "image"
 )
 
 const namearg = "name"
@@ -23,7 +24,7 @@ const thumbheightarg = "thumbheight"
 const viewerwidtharg = "viewerwidth"
 const viewerheightarg = "viewerheight"
 const skipextcheckarg = "skipextcheck"
-const dumpvaluesarg = "dumpvalues"
+const debugarg = "debug"
 
 const thumbnail = "thumbnail.jpg"
 const cacheFolder = "cache"
@@ -92,9 +93,9 @@ func main() {
             Destination: &options.skipextcheck,
         },
         cli.BoolFlag{
-            Name: dumpvaluesarg,
-            Usage: "(Debugging) Dump template values during rendering process",
-            Destination: &options.dumpvalues,
+            Name: debugarg,
+            Usage: "Enable debug logging",
+            Destination: &options.debug,
         },
 	}
 
@@ -125,10 +126,15 @@ func runApp(c *cli.Context) error {
 
 	BuildGallery()
 	CopyResources()
+
+	if !masterAlbum.HasImages() {
+		return fmt.Errorf("No images found in %s or any of its subdirectories. Exiting.", masterAlbum.folder)
+	}
+
 	masterAlbum.UpdateImageRenditions(options.target)
 	masterAlbum.UpdatePages(options.target, options.baseurl)
 
-	fmt.Printf("%d files touched (not including contents of %s)", filesTouched, filepath.Join(options.target, "data"))
+	fmt.Printf("%d files touched (not including contents of %s)\n", filesTouched, filepath.Join(options.target, "data"))
 
 	return nil
 }
@@ -148,15 +154,25 @@ func CopyResources() {
     RestoreAssets(options.target, "data")
 }
 
-func SaveResizedImage(image *Image, width, height int, filename string, skipIfNewer bool) {
+func SaveResizedImage(img *Image, width, height int, filename string, isThumb, skipIfNewer bool) {
 	printErr := func(err error) {
 		fmt.Printf("SaveRezisedImage unexpected error: %s\n", err.Error())
 	}
 
+    updateImageDimensions := func(i image.Image) {
+        newWidth := i.Bounds().Size().X
+        newHeight := i.Bounds().Size().Y
+        if isThumb {
+            img.thumbWidth, img.thumbHeight = newWidth, newHeight
+        } else {
+            img.viewerWidth, img.viewerHeight = newWidth, newHeight
+        }
+    }
+
 	fileExists,_ := exists(filename)
 
 	if skipIfNewer && fileExists {
-		imageInfo, err := os.Stat(image.sourcePath)
+		imageInfo, err := os.Stat(img.sourcePath)
 		if err != nil {
 			printErr(err)
 			return
@@ -169,37 +185,36 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 
 		if imageInfo.ModTime().Before(existingInfo.ModTime()) {
 			// Still need to read the actual width and height for building html
-			existingThumb, err := imaging.Open(filename);
+			existingRendition, err := imaging.Open(filename);
 
 			if err != nil {
 				printErr(err)
 				return
 			}
 
-			image.width = existingThumb.Bounds().Size().X
-			image.height = existingThumb.Bounds().Size().Y
+			updateImageDimensions(existingRendition)
 
 			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source)\n", path.Base(filename))
 			return
 		}
 	}
 
-	fmt.Printf("Generating %dx%d for %s\n", width, height, image.name)
+	fmt.Printf("Generating %dx%d for %s\n", width, height, img.name)
 
-	img, err := imaging.Open(image.sourcePath)
+	imging, err := imaging.Open(img.sourcePath)
 
 	if err != nil {
 		printErr(err)
 		return
 	}
 
-	img = imaging.Fit(img, width, height, imaging.Lanczos)
-	image.width = img.Bounds().Size().X
-	image.height = img.Bounds().Size().Y
+    imging = imaging.Fit(imging, width, height, imaging.Lanczos)
+
+    updateImageDimensions(imging)
 
     if fileExists {
         buf := new(bytes.Buffer)
-        err = imaging.Encode(buf, img, imaging.JPEG)
+        err = imaging.Encode(buf, imging, imaging.JPEG)
 
         if err != nil {
             printErr(err)
@@ -215,17 +230,13 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 
         resizedHash := md5.Sum(buf.Bytes())
 
-        if strings.Contains(filename, `\gallery1_build\thumbnail.jpg`) {
-            fmt.Println("wot")
-        }
-
         if existingHash == resizedHash {
             fmt.Printf("Skipping rendition, generated image has same md5sum as what is already in target folder (%s)\n", filename)
             return
         }
     }
 
-	err = imaging.Save(img, filename)
+	err = imaging.Save(imging, filename)
 
     if err != nil {
         printErr(err)

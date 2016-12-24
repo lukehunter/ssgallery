@@ -124,10 +124,10 @@ var imageTemplateRaw string = `
         }
     </script>
 
-    <link rel="stylesheet" type="text/css" href="../data/ssgallery.css">
+    <link rel="stylesheet" type="text/css" href="%SSG_HOME_URL%/data/ssgallery.css">
 
-    <script type="text/javascript" src="../data/js/3r5d4l.js"></script>
-    <script type="text/javascript" src="../data/js/touchevents.js"></script>
+    <script type="text/javascript" src="%SSG_HOME_URL%/data/js/3r5d4l.js"></script>
+    <script type="text/javascript" src="%SSG_HOME_URL%/data/js/touchevents.js"></script>
 </head>
 
 <body id="thePicturePage" class="  ntf   ats    ">

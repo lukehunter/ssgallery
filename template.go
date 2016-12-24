@@ -82,13 +82,13 @@ func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
 func (t *Template) RenderHtml(filename string) {
     rendered := t.RenderItems()
 
-    printlnIfTrue("template values {", options.dumpvalues)
+    printlnIfTrue("template values {", options.debug)
     for k, v := range t.values {
-        printlnIfTrue(fmt.Sprintf("%s : %s", k, v), options.dumpvalues)
+        printlnIfTrue(fmt.Sprintf("%s : %s", k, v), options.debug)
         token := formatToken(k)
         rendered = strings.Replace(rendered, token, v, -1)
     }
-    printlnIfTrue("} end template values", options.dumpvalues)
+    printlnIfTrue("} end template values", options.debug)
 
     renderedBytes := []byte(rendered)
 
@@ -117,11 +117,11 @@ func (t *Template) RenderHtml(filename string) {
 
 func (t *Template) RenderItems() string {
     if len(t.lists) == 0 {
-        printlnIfTrue("no template items", options.dumpvalues)
+        printlnIfTrue("no template items", options.debug)
         return t.rawHtml
     }
 
-    if options.dumpvalues {
+    if options.debug {
         for k, v := range t.lists {
             fmt.Printf("%s: \n", k)
             for _, item := range *v {

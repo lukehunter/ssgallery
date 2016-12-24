@@ -13,14 +13,14 @@ import (
 )
 
 type Options struct {
-    name, source, target, baseurl, disqus string
+    name, source, target, baseurl, disqus              string
     thumbwidth, thumbheight, viewerwidth, viewerheight int
-    skipextcheck, dumpvalues bool
+    skipextcheck, debug                                bool
 }
 
 type Image struct {
     name, sourcePath, targetPath string
-    width, height    int
+    thumbWidth, thumbHeight, viewerWidth, viewerHeight    int
 }
 
 func (i *Image) filename() string {
@@ -61,6 +61,24 @@ func (a *Album) AddImage(image Image) {
 
 func (a *Album) AddAlbum(album Album) {
     a.albums = append(a.albums[:], album)
+}
+
+func (a *Album) HasImages() bool {
+    if a == nil {
+        return false
+    }
+
+    if len(a.images) > 0 {
+        return true
+    }
+
+    for _,album := range a.albums {
+        if album.HasImages() {
+            return true
+        }
+    }
+
+    return false
 }
 
 func (a *Album) FindThumbnail() *Image {
@@ -153,6 +171,11 @@ func (a *Album)LoadAlbum(path string) {
 }
 
 func (a *Album)UpdateImageRenditions(targetPath string) {
+    if !a.HasImages() {
+        fmt.Printf("Album %s has no images, skipping resize step")
+        return
+    }
+
     fmt.Printf("Updating renditions for album: %s\n", a.name)
 
     for _,album := range a.albums {
@@ -176,17 +199,17 @@ func (a *Album)UpdateImageRenditions(targetPath string) {
             fmt.Printf("UpdateImageRenditions error copying %s to %s: %s\n", image.sourcePath, target, err.Error())
         }
 
-        resize := func(width, height int) {
+        resize := func(width, height int, isThumb bool) {
             path := filepath.Join(targetPath, cacheFolder,
                 formatFilename(image.name, width, height))
-            SaveResizedImage(image, width, height, path, true)
+            SaveResizedImage(image, width, height, path, isThumb, true)
         }
 
         // image thumbnail
-        resize(options.thumbwidth, options.thumbheight)
+        resize(options.thumbwidth, options.thumbheight, true)
 
         // image viewer
-        resize(options.viewerwidth, options.viewerheight)
+        resize(options.viewerwidth, options.viewerheight, false)
     }
 
     albumThumbnailPath := filepath.Join(a.folder, thumbnail)
@@ -195,11 +218,11 @@ func (a *Album)UpdateImageRenditions(targetPath string) {
     // Always generate album thumbnail -- otherwise if thumbnail.jpg is removed from source it will never be re-generated
     if exists,_ := exists(albumThumbnailPath); exists {
         SaveResizedImage(&Image{name: fmt.Sprintf("%s thumbnail", a.name), sourcePath: albumThumbnailPath},
-            options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
+            options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, true, false)
     } else {
         image := a.FindThumbnail()
         fmt.Printf("File %s not found, using %s as album thumbnail\n", albumThumbnailPath, image.sourcePath)
-        SaveResizedImage(image, options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
+        SaveResizedImage(image, options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, true, false)
     }
 }
 
@@ -319,12 +342,13 @@ func (a* Album)UpdatePages(targetPhysicalPath, relativeUrl string) {
         imageId := hex.EncodeToString(imageIdBytes[:])
 
         imageValues := map[string]string {
+            "SSG_HOME_URL": options.baseurl,
             "SSG_IMAGE_NAME": image.name,
             "SSG_PREV_IMAGE_PAGE_URL": prevPage,
             "SSG_NEXT_IMAGE_PAGE_URL": nextPage,
             "SSG_PRELOAD_URL": picToPreload,
-            "SSG_IMAGE_WIDTH": strconv.Itoa(image.width),
-            "SSG_IMAGE_HEIGHT": strconv.Itoa(image.height),
+            "SSG_IMAGE_WIDTH": strconv.Itoa(image.viewerWidth),
+            "SSG_IMAGE_HEIGHT": strconv.Itoa(image.viewerHeight),
             "SSG_IMAGE_URL": imageUrl,
             "SSG_IMAGE_PAGE_URL": pageUrl,
             "SSG_IMAGE_DISQUS_ID": imageId,
