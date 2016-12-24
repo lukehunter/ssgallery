@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"github.com/urfave/cli"
-    //"github.com/disintegration/imaging"
     "errors"
     "path/filepath"
     "strings"
@@ -39,8 +38,6 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "ssgallery"
 	app.Usage = "stupidly simple gallery"
-
-	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
 
     options = Options{}
 
@@ -97,39 +94,39 @@ func main() {
         },
 	}
 
-    i := Image { name: "image_test", path: "path" }
-
-    fmt.Printf("%s\n", i.name)
-
-	app.Action = func(c *cli.Context) error {
-		for _,arg := range args {
-			if (!c.IsSet(arg)) {
-				cli.ShowAppHelp(c)
-				return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
-			}
-		}
-
-		fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'" +
-					"\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
-			options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
-			options.thumbheight, options.viewerwidth, options.viewerheight)
-
-        if !strings.HasPrefix(options.baseurl, "/") {
-            options.baseurl = fmt.Sprintf("/%s", options.baseurl)
-            fmt.Printf("Warning: baseurl does not include leading slash. I added one for you. New baseurl = '%s'\n", options.baseurl)
-        }
-
-        BuildGallery()
-        CopyResources()
-        PopulateImageCache()
-        CreatePages()
-
-        fmt.Printf("%d files touched (not including contents of %s)", filesTouched, filepath.Join(options.target, "data"))
-
-		return nil
-	}
+	app.Action = runApp
 
 	app.Run(os.Args)
+}
+
+func runApp(c *cli.Context) error {
+	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
+
+	for _,arg := range args {
+		if (!c.IsSet(arg)) {
+			cli.ShowAppHelp(c)
+			return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
+		}
+	}
+
+	fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'" +
+																						"\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
+		options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
+		options.thumbheight, options.viewerwidth, options.viewerheight)
+
+	if !strings.HasPrefix(options.baseurl, "/") {
+		options.baseurl = fmt.Sprintf("/%s", options.baseurl)
+		fmt.Printf("Warning: baseurl does not include leading slash. I added one for you. New baseurl = '%s'\n", options.baseurl)
+	}
+
+	BuildGallery()
+	CopyResources()
+	PopulateImageCache()
+	CreatePages()
+
+	fmt.Printf("%d files touched (not including contents of %s)", filesTouched, filepath.Join(options.target, "data"))
+
+	return nil
 }
 
 func BuildGallery() {
