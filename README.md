@@ -8,12 +8,11 @@ I created this software out of frustration with all the bloated and unnecessaril
 See http://lukehunter.net/wallpapers/
 
 ## Usage
-
-The following is an example command line for ssgallery hosted at http://server/mywebgallery/:
+The following is an example command line for a gallery hosted at http://server/mywebgallery/:
 
 ### Windows
 
-ssgallery.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery/" --disqus "//your-disqus-url.disqus.com/embed.js"
+ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery/" --disqus "//your-disqus-url.disqus.com/embed.js"
 
 ### OSX/Linux
 
@@ -21,9 +20,9 @@ ssgallery.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\ww
 
 ## Download
 
-- [Windows](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_windows_386.exe)
-- [OSX](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_darwin_386)
-- [Linux](https://github.com/lukehunter/ssgallery/blob/master/bin/ssgallery_linux_386)
+- Windows [32-bit](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_windows_386.exe) | [64-bit](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_windows_amd64.exe)
+- OSX [32-bit](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_darwin_386) | [64-bit](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_darwin_amd64)
+- Linux [32-bit](https://github.com/lukehunter/ssgallery/blob/master/bin/ssgallery_linux_386) | [64-bit](https://github.com/lukehunter/ssgallery/blob/master/bin/ssgallery_linux_amd64)
 - Other: See binaries checked in [here](https://github.com/lukehunter/ssgallery/tree/master/bin)
 
 --or-- if you have go installed
