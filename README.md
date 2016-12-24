@@ -27,10 +27,10 @@ See http://lukehunter.net/wallpapers/
 
 ## Download
 
-- [Windows](https://github.com/lukehunter/ssgallery/raw/master/ssgallery_windows_386.exe)
-- [OSX](https://github.com/lukehunter/ssgallery/raw/master/ssgallery_darwin_386)
-- [Linux](https://github.com/lukehunter/ssgallery/blob/master/ssgallery_linux_386)
-- Other: See binaries checked in [here](https://github.com/lukehunter/ssgallery)
+- [Windows](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_windows_386.exe)
+- [OSX](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_darwin_386)
+- [Linux](https://github.com/lukehunter/ssgallery/blob/master/bin/ssgallery_linux_386)
+- Other: See binaries checked in [here](https://github.com/lukehunter/bin/ssgallery)
 
 --or-- if you have go installed
 
