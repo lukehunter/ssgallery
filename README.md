@@ -23,7 +23,7 @@ An ssgallery theme consists of three templates:
   - Navigate forward by clicking on the image
   
 ## Example Gallery
-See http://lukehunter.net/nielsenphotos/
+See http://lukehunter.net/wallpapers/
 
 ## Download
 
@@ -88,7 +88,7 @@ See above for usage instructions.
 You're done!
 
 ## A Note about Disqus
-Disqus identifies comment pages using a page identifier and/or a page url (see: https://help.disqus.com/customer/portal/articles/472098-javascript-configuration-variables). ssgallery uses an md5 hash of the original source image for the identifier, and does not bother to provide a url. This means as long as the source image is not modified, the comments should still show up correctly even if the url changes. The url needs to be absolute, and disqus will retrieve it using javascript if it is not provided, so currently ssgallery doesn't bother to provide it as I didn't want to have to change it depending on where I was hosting the gallery. If you do change domains after disqus comments have been left, you may need to use the Disqus migration tool to move them.
+Disqus identifies comment pages using a page identifier and/or a page url (see: https://help.disqus.com/customer/portal/articles/472098-javascript-configuration-variables). ssgallery uses an md5 hash of the original source image for the identifier, and does not bother to provide a url. This means as long as the source image is not modified, the comments should still show up correctly even if the url changes. If you change domains after disqus comments have been entered, you may need to use the [Disqus migration tool](https://help.disqus.com/customer/portal/articles/286778-migration-tools) to move them.
 
 ## known issues
 - If you run ssgallery multiple times and remove some images in between runs, you will end up with extra files in your destination folder. over time this could grow and start wasting disk space. a simple workaround is to completely delete the target folder and re-generate from scratch occasionally.
