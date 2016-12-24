@@ -29,7 +29,7 @@ const skipextcheckarg = "skipextcheck"
 
 const thumbnail = "thumbnail.jpg"
 const cacheFolder = "cache"
-const filemode = 0644
+const filemode = 0755
 
 var options Options
 var gallery Gallery

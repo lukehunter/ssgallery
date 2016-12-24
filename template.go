@@ -88,7 +88,7 @@ func (t *Template) RenderHtml(filename string) {
     }
 
     fmt.Printf("Writing %s\n", filename)
-    err := ioutil.WriteFile(filename, renderedBytes, 0644)
+    err := ioutil.WriteFile(filename, renderedBytes, 0755)
 
     check(err)
 

@@ -62,10 +62,9 @@ func Copy(src, dst string) error {
     inHash, err := hash_file_md5(src)
     if err != nil { return err }
 
-    outHash, err := hash_file_md5(dst)
-    if err != nil { return err }
+    outHash, outErr := hash_file_md5(dst)
 
-    if inHash == outHash {
+    if outErr != nil && inHash == outHash {
         fmt.Printf("Skipping copy, %s has same md5sum as %s", src, dst)
         return nil
     }
