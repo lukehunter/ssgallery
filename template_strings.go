@@ -9,23 +9,43 @@ var albumTemplateRaw string = `
 
 	<meta name="description" content="%SSG_ALBUM_NAME%">
 
-	<title>%SSG_ALBUM_NAME% | %SSG_GALLERY_NAME%</title>
+	<title>%SSG_ALBUM_NAME%</title>
 
-	<link rel="stylesheet" type="text/css" href="../data/ssgallery.css">
-	<link rel="start" title="Home" href="/nielsenphotos/" >
+	<link rel="stylesheet" type="text/css" href="%SSG_CSS_URL%">
+	<link rel="start" title="Home" href="%SSG_HOME_URL%" >
 </head>
 
 <body id="theCategoryPage" class="  ntf   ats    ">
 	<div id="the_page">
         <div class="titrePage" id="imageHeaderBar">
             <div class="browsePath">
-                <a href="%SSG_HOME_URL%">%SSG_GALLERY_NAME%</a> / %SSG_ALBUM_NAME%
+                <!-- %SSG_BREADCRUMB_LIST_ITEM_START% -->
+                <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a> /
+                <!-- %SSG_BREADCRUMB_LIST_ITEM_END% -->
+                %SSG_ALBUM_NAME%
             </div>
         </div>
 		<div id="content" >
 			<div id="content_cell">
 				<div id="subcontent">
 					<ul class="thumbnailCategories">
+
+					    <!-- %SSG_ALBUM_LIST_ITEM_START% -->
+					    <li onclick="window.location='%SSG_ALBUM_URL%';">
+						    <div class="thumbnailCategory">
+						        <div class="illustration">
+						            <a href="%SSG_ALBUM_URL%">
+						                <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="%SSG_ALBUM_THUMBNAIL_WIDTH%" height="%SSG_ALBUM_THUMBNAIL_HEIGHT%" alt="%SSG_ALBUM_NAME%">
+						            </a>
+						        </div>
+						        <div class="description">
+						            <h3>
+						                <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a>
+						            </h3>
+						        </div>
+						    </div>
+						</li>
+					    <!-- %SSG_ALBUM_LIST_ITEM_END%-->
 
 						<!-- %SSG_IMAGE_LIST_ITEM_START% -->
 						<li onclick="window.location='%SSG_IMAGE_URL%';">
@@ -43,62 +63,6 @@ var albumTemplateRaw string = `
 						    </div>
 						</li>
 						<!-- %SSG_IMAGE_LIST_ITEM_END% -->
-
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-</div>
-</body>
-</html>
-`
-
-var galleryTemplateRaw string = `
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en" dir="ltr">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="generator" content="ssgallery">
-
-	<meta name="description" content="%SSG_GALLERY_NAME%">
-
-	<title>%SSG_GALLERY_NAME%</title>
-
-	<link rel="stylesheet" type="text/css" href="data/ssgallery.css">
-	<link rel="start" title="Home" href="/nielsenphotos/" >
-</head>
-
-<body id="theCategoryPage" class="  ntf   ats    ">
-	<div id="the_page">
-        <div class="titrePage" id="imageHeaderBar">
-            <div class="browsePath">
-                %SSG_GALLERY_NAME%
-            </div>
-        </div>
-		<div id="content" >
-			<div id="content_cell">
-				<div id="subcontent">
-					<ul class="thumbnailCategories">
-
-						<!-- %SSG_ALBUM_LIST_ITEM_START% -->
-						<li onclick="window.location='%SSG_ALBUM_URL%';">
-						    <div class="thumbnailCategory">
-						        <div class="illustration">
-						            <a href="%SSG_ALBUM_URL%">
-						                <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="%SSG_ALBUM_THUMBNAIL_WIDTH%" height="%SSG_ALBUM_THUMBNAIL_HEIGHT%" alt="%SSG_ALBUM_NAME%">
-						            </a>
-						        </div>
-						        <div class="description">
-						            <h3>
-						                <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a>
-						            </h3>
-						        </div>
-						    </div>
-
-						</li>
-						<!-- %SSG_ALBUM_LIST_ITEM_END% -->
 
 					</ul>
 				</div>
@@ -216,11 +180,11 @@ var imageTemplateRaw string = `
                     /**
                     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
                     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-                    /*
+
                     var disqus_config = function () {
                     this.page.identifier = %SSG_IMAGE_DISQUS_ID%; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
                     };
-                    */
+
                     (function() { // DON'T EDIT BELOW THIS LINE
                         var d = document, s = d.createElement('script');
                         s.src = '%SSG_DISQUS_URL%';

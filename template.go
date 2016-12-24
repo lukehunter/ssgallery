@@ -16,10 +16,23 @@ type TemplateItem struct {
     values map[string]string
 }
 
+func NewTemplateItem(tag string) *TemplateItem {
+    ti := new(TemplateItem)
+    ti.tag = tag
+    ti.values = map[string]string{}
+    return ti
+}
+
+func (t *TemplateItem) AddValues(values map[string]string) {
+    for k, v := range values {
+        t.values[k] = v
+    }
+}
+
 type Template struct {
     rawHtml string
     values  map[string]string
-    items   []TemplateItem
+    lists   map[string][]TemplateItem
 }
 
 func formatToken(s string) string {
@@ -30,7 +43,7 @@ func NewTemplate(rawHtml string) *Template {
     t := new(Template)
     t.rawHtml = rawHtml
     t.values = map[string]string{}
-    t.items = []TemplateItem{}
+    t.lists = make(map[string][]TemplateItem)
     return t
 }
 
@@ -41,7 +54,7 @@ func (t *Template) AddValues(values map[string]string) {
 }
 
 func (t *Template) AddItem(item TemplateItem) {
-    t.items = append(t.items[:], item)
+    t.lists[item.tag] = append(t.lists[item.tag], item)
 }
 
 func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
@@ -64,6 +77,10 @@ func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
 
 func (t *Template) RenderHtml(filename string) {
     rendered := t.RenderItems()
+
+    if strings.Contains(filename, "index.html") {
+        fmt.Println(rendered)
+    }
 
     for k, v := range t.values {
         token := formatToken(k)
@@ -96,47 +113,53 @@ func (t *Template) RenderHtml(filename string) {
 }
 
 func (t *Template) RenderItems() string {
-    if len(t.items) == 0 {
+    if len(t.lists) == 0 {
         return t.rawHtml
     }
 
     rendered := t.rawHtml
-    itemInfo := t.items[0]
-
-    startTag := fmt.Sprintf("<!-- %%%s_START%% -->", itemInfo.tag)
-    endTag := fmt.Sprintf("<!-- %%%s_END%% -->", itemInfo.tag)
-
-    startIndex := strings.Index(rendered, startTag)
-
-    if startIndex < 0 {
-        panic(errors.New(fmt.Sprintf("could not find item start tag %s", startTag)))
-    }
-
-    endIndex := strings.Index(rendered, endTag)
-
-    if endIndex < 0 {
-        panic(errors.New(fmt.Sprintf("could not find item end tag %s", endTag)))
-    }
-
-    itemTemplate := rendered[startIndex:endIndex]
-    aboveItems := rendered[0:startIndex]
-    belowItems := rendered[endIndex:]
-
     var itemsHtml bytes.Buffer
 
-    for _,item := range t.items {
-        curItemHtml := itemTemplate
+    // todo: delete item templates that are unused (e.g. album with no sub-albums, or no images)
+    for tag,_ := range t.lists {
+        startTag := fmt.Sprintf("<!-- %%%s_START%% -->", tag)
+        endTag := fmt.Sprintf("<!-- %%%s_END%% -->", tag)
 
-        for k,v := range item.values {
-            token := formatToken(k)
-            curItemHtml = strings.Replace(curItemHtml, token, v, -1)
+        startIndex := strings.Index(rendered, startTag)
+
+        if startIndex < 0 {
+            fmt.Println(rendered)
+            panic(errors.New(fmt.Sprintf("could not find item start tag %s", startTag)))
         }
 
-        itemsHtml.WriteString(curItemHtml)
-        itemsHtml.WriteString("\n")
-    }
+        endIndex := strings.Index(rendered, endTag)
 
-    rendered = aboveItems + itemsHtml.String() + belowItems
+        if endIndex < 0 {
+            fmt.Println(rendered)
+            panic(errors.New(fmt.Sprintf("could not find item end tag %s", endTag)))
+        }
+
+        aboveItems := rendered[0:startIndex]
+        belowItems := rendered[endIndex:]
+
+        for _, tplItemList := range t.lists[tag] {
+            curItemTemplate := rendered[startIndex:endIndex]
+
+            for k,v := range tplItemList.values {
+                token := formatToken(k)
+                curItemTemplate = strings.Replace(curItemTemplate, token, v, -1)
+            }
+
+            itemsHtml.WriteString(curItemTemplate)
+            itemsHtml.WriteString("\n")
+        }
+
+        fmt.Println(itemsHtml.String())
+
+        rendered = aboveItems + itemsHtml.String() + belowItems
+
+        itemsHtml.Reset()
+    }
 
     return rendered
 }

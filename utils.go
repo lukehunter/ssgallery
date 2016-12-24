@@ -34,7 +34,7 @@ func getItemList(path string, includeDirs bool, includeFiles bool) []string {
     itemList := []string{}
 
     err := filepath.Walk(path, func(curPath string, fi os.FileInfo, err error) error {
-        if includeDirs && fi.IsDir() && curPath != options.source {
+        if includeDirs && fi.IsDir() && curPath != path {
             itemList = append(itemList, curPath)
         }
 
