@@ -112,6 +112,11 @@ func main() {
 			options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
 			options.thumbheight, options.viewerwidth, options.viewerheight)
 
+        if !strings.HasPrefix(options.baseurl, "/") {
+            options.baseurl = fmt.Sprintf("/%s", options.baseurl)
+            fmt.Printf("Warning: baseurl does not include leading slash. I added one for you. New baseurl = '%s'\n", options.baseurl)
+        }
+
         BuildGallery()
         CopyResources()
         PopulateImageCache()
@@ -306,7 +311,7 @@ func CreatePages() {
 
 		albumValues := map[string]string {
 			"SSG_ALBUM_NAME": album.name,
-			"SSG_ALBUM_URL": options.baseurl + album.name + "/",
+			"SSG_ALBUM_URL": filepath.Join(options.baseurl, album.name),
 			"SSG_ALBUM_THUMBNAIL_WIDTH": strconv.Itoa(albumThumbImg.Bounds().Size().X),
 			"SSG_ALBUM_THUMBNAIL_HEIGHT": strconv.Itoa(albumThumbImg.Bounds().Size().Y),
 		}
