@@ -100,3 +100,9 @@ func stringInSlice(a string, list []string) bool {
     }
     return false
 }
+
+func printlnIfTrue(msg string, flag bool) {
+    if flag {
+        fmt.Println(msg)
+    }
+}

@@ -54,7 +54,6 @@ func (t *Template) AddValues(values map[string]string) {
 }
 
 func (t *Template) AddItem(item TemplateItem) {
-    fmt.Println("adding item to ", item.tag)
     if t.lists[item.tag] == nil {
         t.lists[item.tag] = &[]TemplateItem{}
     }
@@ -83,13 +82,13 @@ func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
 func (t *Template) RenderHtml(filename string) {
     rendered := t.RenderItems()
 
-    //fmt.Println("template values {")
-    //for k, v := range t.values {
-    //    fmt.Printf("%s : %s\n", k, v)
-    //    token := formatToken(k)
-    //    rendered = strings.Replace(rendered, token, v, -1)
-    //}
-    //fmt.Println("} end template values")
+    printlnIfTrue("template values {", options.dumpvalues)
+    for k, v := range t.values {
+        printlnIfTrue(fmt.Sprintf("%s : %s", k, v), options.dumpvalues)
+        token := formatToken(k)
+        rendered = strings.Replace(rendered, token, v, -1)
+    }
+    printlnIfTrue("} end template values", options.dumpvalues)
 
     renderedBytes := []byte(rendered)
 
@@ -118,20 +117,22 @@ func (t *Template) RenderHtml(filename string) {
 
 func (t *Template) RenderItems() string {
     if len(t.lists) == 0 {
-        fmt.Println("no template items")
+        printlnIfTrue("no template items", options.dumpvalues)
         return t.rawHtml
     }
 
-    for k,v := range t.lists {
-        fmt.Printf("%s: \n", k)
-        for _,item := range *v {
-            fmt.Printf("%s{", item.tag)
-            for k,v := range *item.values {
-                fmt.Printf("\n\t%s:%s", k, v)
+    if options.dumpvalues {
+        for k, v := range t.lists {
+            fmt.Printf("%s: \n", k)
+            for _, item := range *v {
+                fmt.Printf("%s{", item.tag)
+                for k, v := range *item.values {
+                    fmt.Printf("\n\t%s:%s", k, v)
+                }
+                fmt.Printf("}\n")
             }
-            fmt.Printf("}\n")
+            fmt.Printf("\n\n")
         }
-        fmt.Printf("\n\n")
     }
 
     rendered := t.rawHtml

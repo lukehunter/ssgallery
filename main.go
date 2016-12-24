@@ -23,6 +23,7 @@ const thumbheightarg = "thumbheight"
 const viewerwidtharg = "viewerwidth"
 const viewerheightarg = "viewerheight"
 const skipextcheckarg = "skipextcheck"
+const dumpvaluesarg = "dumpvalues"
 
 const thumbnail = "thumbnail.jpg"
 const cacheFolder = "cache"
@@ -90,6 +91,11 @@ func main() {
             Usage: "Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)",
             Destination: &options.skipextcheck,
         },
+        cli.BoolFlag{
+            Name: dumpvaluesarg,
+            Usage: "(Debugging) Dump template values during rendering process",
+            Destination: &options.dumpvalues,
+        },
 	}
 
 	app.Action = runApp
@@ -132,7 +138,7 @@ func BuildGallery() {
         panic(errors.New(fmt.Sprintf("could not find path %s", options.source)))
     }
 
-    masterAlbum = NewAlbum(options.name, options.source, nil)
+    masterAlbum = NewTopAlbum(options.name, options.source, options.baseurl, nil)
 
     masterAlbum.LoadAlbum(options.source)
 }

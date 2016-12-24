@@ -82,7 +82,7 @@ var imageTemplateRaw string = `
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="generator" content="ssgallery">
 
-	<title>%SSG_IMAGE_NAME% | %SSG_GALLERY_NAME%</title>
+	<title>%SSG_IMAGE_NAME% | %SSG_ALBUM_NAME%</title>
 
 	<link rel="start" title="Home" href="%SSG_HOME_URL%" >
 	<link rel="prev" title="Prev" href="%SSG_PREV_IMAGE_PAGE_URL%" >
@@ -139,9 +139,12 @@ var imageTemplateRaw string = `
 			</script>
 
 			<div class="titrePage" id="imageHeaderBar">
-				<div class="browsePath">
-					<a href="%SSG_HOME_URL%">%SSG_GALLERY_NAME%</a> / <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a> / %SSG_IMAGE_NAME%
-				</div>
+            <div class="browsePath">
+                <!-- %SSG_BREADCRUMB_LIST_ITEM_START%
+                <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a> /
+                %SSG_BREADCRUMB_LIST_ITEM_END% -->
+                %SSG_IMAGE_NAME%
+            </div>
 			</div>
 
 			<div id="content">

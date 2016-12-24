@@ -15,7 +15,7 @@ import (
 type Options struct {
     name, source, target, baseurl, disqus string
     thumbwidth, thumbheight, viewerwidth, viewerheight int
-    skipextcheck bool
+    skipextcheck, dumpvalues bool
 }
 
 type Image struct {
@@ -28,19 +28,30 @@ func (i *Image) filename() string {
 }
 
 type Album struct {
-    name, folder string
+    name, folder, relUrl string
     parent *Album
     albums []Album
     images []Image
 }
 
-func NewAlbum(name string, folder string, parent *Album) *Album {
+func NewAlbum(name, folder string, parent *Album) *Album {
     a := new(Album)
     a.name = name
     a.folder = folder
     a.parent = parent
     a.albums = []Album{}
     a.images = []Image{}
+    if a.parent != nil {
+        a.relUrl = path.Join(a.parent.relUrl, name)
+    }
+    return a;
+}
+
+func NewTopAlbum(name, folder, relUrl string, parent *Album) *Album {
+    a := NewAlbum(name, folder, parent)
+
+    a.relUrl = relUrl
+
     return a
 }
 
@@ -207,6 +218,19 @@ func (a* Album)UpdatePages(targetPhysicalPath, relativeUrl string) {
 
     albumTemplate.AddValues(albumValues);
 
+    if a.parent != nil {
+        breadcrumbs := a.parent.GetBreadcrumbs([]Album{})
+
+        for _, breadcrumb := range breadcrumbs {
+            breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
+
+            (*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumb.relUrl
+            (*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
+
+            albumTemplate.AddItem(*breadcrumbTemplateItem)
+        }
+    }
+
     for _, subAlbum := range a.albums {
         subAlbum.UpdatePages(filepath.Join(targetPhysicalPath, subAlbum.name),
                                 path.Join(relativeUrl, subAlbum.name))
@@ -235,6 +259,17 @@ func (a* Album)UpdatePages(targetPhysicalPath, relativeUrl string) {
     for i,image := range a.images {
         imageTemplate := NewTemplate(imageTemplateRaw)
         imageTemplateItem := NewTemplateItem("SSG_IMAGE_LIST_ITEM")
+
+        breadcrumbs := a.GetBreadcrumbs([]Album{})
+
+        for _, breadcrumb := range breadcrumbs {
+            breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
+
+            (*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumb.relUrl
+            (*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
+
+            imageTemplate.AddItem(*breadcrumbTemplateItem)
+        }
 
         var nextPage, prevPage, picToPreload string
 
