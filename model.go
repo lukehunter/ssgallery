@@ -1,12 +1,13 @@
 package main
 
 import (
-    "path"
+    "path/filepath"
 )
 
 type Options struct {
     name, source, target, baseurl, disqus string
     thumbwidth, thumbheight, viewerwidth, viewerheight int
+    skipextcheck bool
 }
 
 type Image struct {
@@ -15,8 +16,7 @@ type Image struct {
 }
 
 func (i *Image) filename() string {
-    _, file := path.Split(i.name)
-    return file
+    return filepath.Base(i.path)
 }
 
 type Album struct {
@@ -24,7 +24,15 @@ type Album struct {
     images []Image
 }
 
+func (a *Album) AddImage(image Image) {
+    a.images = append(a.images[:], image)
+}
+
 type Gallery struct {
     name string
     albums []Album
+}
+
+func (g *Gallery) AddAlbum(album Album) {
+    g.albums = append(g.albums[:], album)
 }

@@ -26,6 +26,24 @@ func formatToken(s string) string {
     return fmt.Sprintf("%%%s%%", s)
 }
 
+func NewTemplate(rawHtml string) *Template {
+    t := new(Template)
+    t.rawHtml = rawHtml
+    t.values = map[string]string{}
+    t.items = []TemplateItem{}
+    return t
+}
+
+func (t *Template) AddValues(values map[string]string) {
+    for k, v := range values {
+        t.values[k] = v
+    }
+}
+
+func (t *Template) AddItem(item TemplateItem) {
+    t.items = append(t.items[:], item)
+}
+
 func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
     startToken := fmt.Sprintf("%s_REGION_START", regionTag)
     endToken := fmt.Sprintf("%s_REGION_END", regionTag)
@@ -49,7 +67,7 @@ func (t *Template) RenderHtml(filename string) {
 
     for k, v := range t.values {
         token := formatToken(k)
-        strings.Replace(rendered, token, v, -1)
+        rendered = strings.Replace(rendered, token, v, -1)
     }
 
     renderedBytes := []byte(rendered)
@@ -64,12 +82,12 @@ func (t *Template) RenderHtml(filename string) {
         renderedHash = md5.Sum(renderedBytes)
 
         if (renderedHash == existingHash) {
-            fmt.Printf("Skipping %s, existing file is up to date", filename)
+            fmt.Printf("Skipping %s, existing file is up to date\n", filename)
             return;
         }
     }
 
-    fmt.Printf("Writing %s", filename)
+    fmt.Printf("Writing %s\n", filename)
     err := ioutil.WriteFile(filename, renderedBytes, 0644)
 
     check(err)
@@ -142,5 +160,4 @@ func hash_file_md5(filePath string) ([16]byte, error) {
     copy(hashInBytes[:], hash.Sum(nil)[:16])
 
     return hashInBytes, nil
-
 }

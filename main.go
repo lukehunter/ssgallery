@@ -6,11 +6,13 @@ import (
 	"github.com/urfave/cli"
     //"github.com/disintegration/imaging"
     "errors"
-    "path"
     "path/filepath"
     "strings"
-    "net/http"
 	"github.com/disintegration/imaging"
+	"strconv"
+    "path"
+    "crypto/md5"
+    "encoding/hex"
 )
 
 const namearg = "name"
@@ -22,6 +24,7 @@ const thumbwidtharg = "thumbwidth"
 const thumbheightarg = "thumbheight"
 const viewerwidtharg = "viewerwidth"
 const viewerheightarg = "viewerheight"
+const skipextcheckarg = "skipextcheck"
 
 const thumbnail = "thumbnail.jpg"
 const cacheFolder = "cache"
@@ -85,11 +88,16 @@ func main() {
 			Usage: "Set max image viewer height to `HEIGHT`",
 			Destination: &options.viewerheight,
 		},
+        cli.BoolFlag{
+            Name: skipextcheckarg,
+            Usage: "Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)",
+            Destination: &options.skipextcheck,
+        },
 	}
 
     i := Image { name: "image_test", path: "path" }
 
-    fmt.Printf("%s", i.name)
+    fmt.Printf("%s\n", i.name)
 
 	app.Action = func(c *cli.Context) error {
 		for _,arg := range args {
@@ -125,23 +133,43 @@ func BuildGallery() {
         albums: []Album {},
     }
 
+    fmt.Printf("Scanning %s...\n", options.source)
     dirList := getDirList(options.source)
 
+    fmt.Printf("Found %d albums", len(dirList))
     for _,album := range dirList {
-        // does base() work?
+        fmt.Printf("Scanning %s...\n", album)
         curAlbum := Album { name: filepath.Base(album), folder: album, images: []Image{}}
         files := getFileList(album)
 
+        fmt.Printf("Found %d images\n", len(files))
         for _,image := range files {
             if strings.Contains(image, thumbnail) {
                 continue
             }
 
+            if !options.skipextcheck {
+                valid := []string{".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp", ".tif"}
+
+                ext := strings.ToLower(filepath.Ext(image))
+
+                if !stringInSlice(ext, valid) {
+                    fmt.Printf("Unrecognized file extension on %s, ignoring (accepted are %s, override this behavior with --%s)", image, strings.Join(valid, ", "), skipextcheckarg)
+                    continue
+                }
+            }
+
+            _, err := imaging.Open(image)
+            if err != nil {
+                fmt.Printf("Unable to open %s, skipping (%s)\n", image, err.Error())
+                continue
+            }
+
             curImage := Image { name: fileNameWithoutExtension(image), path: image }
-            append(curAlbum.images, curImage)
+			curAlbum.AddImage(curImage)
         }
 
-        append(gallery.albums, curAlbum)
+		gallery.AddAlbum(curAlbum)
     }
 }
 
@@ -152,47 +180,65 @@ func CopyResources() {
 
 func PopulateImageCache() {
 	for _,album := range gallery.albums {
-		os.Mkdir(path.Join(options.target, album.name, cacheFolder), filemode)
+        curCacheFolder := filepath.Join(options.target, album.name, cacheFolder)
+		err := os.MkdirAll(curCacheFolder, filemode)
 
-		fmt.Printf("Caching album: %s", album.name)
+        if err != nil {
+            fmt.Printf("Error making directory %s: %s", curCacheFolder, err.Error())
+            continue
+        }
 
-		for _,image := range album.images {
-			Copy(image.path, path.Join(options.target, album.name, path.Base(image.path)))
+		fmt.Printf("Caching album: %s\n", album.name)
+
+		for i := 0; i < len(album.images); i++ {
+			image := &album.images[i] // necessary because we are modifying the image class (hack)
+			target := filepath.Join(options.target, album.name, filepath.Base(image.path))
+			err := Copy(image.path, target)
+
+			if err != nil {
+				fmt.Printf("PopulateImageCache error copying %s to %s: %s\n", image.path, target, err.Error())
+			}
 
 			resize := func(width, height int) {
-				path := path.Join(options.target, album.name, cacheFolder,
+				path := filepath.Join(options.target, album.name, cacheFolder,
 					formatFilename(image.name, width, height))
 				SaveResizedImage(image, width, height, path, true)
 			}
 
 			// image thumbnail
+			fmt.Printf("1 iw:%d ih:%d\n", image.width, image.height)
 			resize(options.thumbwidth, options.thumbheight)
+			fmt.Printf("2 iw:%d ih:%d\n", image.width, image.height)
 
 			// image viewer
+			fmt.Printf("3 iw:%d ih:%d\n", image.width, image.height)
 			resize(options.viewerwidth, options.viewerheight)
+			fmt.Printf("4 iw:%d ih:%d\n", image.width, image.height)
 		}
 
-		albumThumbnailPath := path.Join(album.folder, thumbnail)
-		targetAlbumThumbnailPath := path.Join(options.target, album.name, thumbnail)
+		albumThumbnailPath := filepath.Join(album.folder, thumbnail)
+		targetAlbumThumbnailPath := filepath.Join(options.target, album.name, thumbnail)
 
 		// Always generate album thumbnail -- otherwise if thumbnail.jpg is removed from source it will never be re-generated
-		if exists(albumThumbnailPath) {
-			SaveResizedImage(Image{name: fmt.Sprintf("%s thumbnail", album.name), path: albumThumbnailPath},
+		if exists,_ := exists(albumThumbnailPath); exists {
+			SaveResizedImage(&Image{name: fmt.Sprintf("%s thumbnail", album.name), path: albumThumbnailPath},
 				options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
 		} else {
 			image := album.images[0]
-			fmt.Printf("File %s not found, using %s as album thumbnail", albumThumbnailPath, image.path)
-			SaveResizedImage(image, options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
+			fmt.Printf("File %s not found, using %s as album thumbnail\n", albumThumbnailPath, image.path)
+			SaveResizedImage(&image, options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, false)
 		}
 	}
 }
 
 func SaveResizedImage(image *Image, width, height int, filename string, skipIfNewer bool) {
 	printErr := func(err error) {
-		fmt.Printf("SaveRezisedImage unexpected error: %s", err.Error())
+		fmt.Printf("SaveRezisedImage unexpected error: %s\n", err.Error())
 	}
 
-	if skipIfNewer && exists(filename) {
+	fileExists,_ := exists(filename)
+
+	if skipIfNewer && fileExists {
 		imageInfo, err := os.Stat(image.path)
 		if err != nil {
 			printErr(err)
@@ -204,7 +250,7 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 			return
 		}
 
-		if imageInfo.ModTime() <= existingInfo.ModTime() {
+		if imageInfo.ModTime().Before(existingInfo.ModTime()) {
 			// Still need to read the actual width and height for building html
 			existingThumb, err := imaging.Open(filename);
 
@@ -216,12 +262,12 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 			image.width = existingThumb.Bounds().Size().X
 			image.height = existingThumb.Bounds().Size().Y
 
-			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source", path.Base(filename))
+			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source\n", path.Base(filename))
 			return
 		}
 	}
 
-	fmt.Printf("Generating %dx%d for %s", width, height, image.name)
+	fmt.Printf("Generating %dx%d for %s\n", width, height, image.name)
 
 	img, err := imaging.Open(image.path)
 
@@ -230,12 +276,133 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
 		return
 	}
 
-	imaging.Fit(img, width, height, imaging.Lanczos)
-
+	img = imaging.Fit(img, width, height, imaging.Lanczos)
 	image.width = img.Bounds().Size().X
 	image.height = img.Bounds().Size().Y
 
-	imaging.Save(img, filename)
+	err = imaging.Save(img, filename)
+
+    if err != nil {
+        printErr(err)
+    }
+}
+
+func CreatePages() {
+	galleryTemplate := NewTemplate(galleryTemplateRaw)
+
+	galleryValues := map[string]string {
+		"SSG_GALLERY_NAME": gallery.name,
+		"SSG_HOME_URL": options.baseurl,
+		"SSG_GALLERY_URL": options.baseurl + gallery.name + "/",
+		"SSG_DISQUS_URL": options.disqus,
+	}
+
+	fmt.Printf("--rendering html for gallery '%s'\n", gallery.name)
+	galleryTemplate.AddValues(galleryValues);
+
+	for _,album := range gallery.albums {
+		fmt.Printf("--rendering html for album '%s'\n", album.name)
+		albumThumb := filepath.Join(options.target, album.name, thumbnail)
+		albumThumbImg, err := imaging.Open(albumThumb)
+
+		if err != nil {
+			fmt.Printf("Unable to open %s\n", albumThumb)
+			continue
+		}
+
+		albumValues := map[string]string {
+			"SSG_ALBUM_NAME": album.name,
+			"SSG_ALBUM_URL": options.baseurl + album.name + "/",
+			"SSG_ALBUM_THUMBNAIL_WIDTH": strconv.Itoa(albumThumbImg.Bounds().Size().X),
+			"SSG_ALBUM_THUMBNAIL_HEIGHT": strconv.Itoa(albumThumbImg.Bounds().Size().Y),
+		}
+
+		albumTemplate := NewTemplate(albumTemplateRaw)
+
+		albumTemplate.AddValues(galleryValues)
+		albumTemplate.AddValues(albumValues)
+
+		galleryTemplate.AddItem(TemplateItem{tag: "SSG_ALBUM_LIST_ITEM", values: albumValues})
+
+		for i,image := range album.images {
+			fmt.Printf("--rendering html for image '%s'\n", image.name)
+			imageTemplate := NewTemplate(imageTemplateRaw)
+
+			var nextPage, prevPage, picToPreload string
+
+			if i > 0 {
+				prevPage = fmt.Sprintf("%s.html", album.images[i - 1].name)
+				imageTemplate.SetHiddenRegion("SSG_PREV_IMAGE_LINK", false)
+			} else {
+				imageTemplate.SetHiddenRegion("SSG_PREV_IMAGE_LINK", true)
+			}
+			
+			if (i < len(album.images) - 1) {
+				nextImage := album.images[i + 1]
+				nextPage = fmt.Sprintf("%s.html", nextImage.name)
+				picToPreload = filepath.Join(cacheFolder, formatFilename(nextImage.name, options.viewerwidth, options.viewerheight))
+				
+				imageTemplate.SetHiddenRegion("SSG_NEXT_IMAGE_LINK", false)
+			} else {
+				imageTemplate.SetHiddenRegion("SSG_NEXT_IMAGE_LINK", true)
+			}
+
+            if len(options.disqus) == 0 {
+                imageTemplate.SetHiddenRegion("SSG_DISQUS", true)
+            } else {
+                imageTemplate.SetHiddenRegion("SSG_DISQUS", false)
+            }
+
+			imageThumb := filepath.Join(options.target, album.name, cacheFolder,
+				formatFilename(image.name, options.thumbwidth, options.thumbheight))
+			imageThumbImage, err := imaging.Open(imageThumb)
+
+			if err != nil {
+				fmt.Printf("Unable to open %s\n", imageThumb)
+				continue
+			}
+
+			imageUrl := filepath.Join(cacheFolder, formatFilename(image.name, options.viewerwidth, options.viewerheight))
+			imageThumbUrl := filepath.Join(cacheFolder, formatFilename(image.name, options.thumbwidth, options.thumbheight))
+            pageUrl := fmt.Sprintf("%s.html", image.name)
+            imageIdBytes, err := hash_file_md5(image.path)
+
+            if err != nil {
+                fmt.Printf("Failed to calculate hash on %s (%s), falling back on gallery/album/image style ID for disqus", image.path, err.Error())
+                imageIdBytes = md5.Sum([]byte(fmt.Sprintf("%s-%s-%s", gallery.name, album.name, image.name)))
+            }
+
+            imageId := hex.EncodeToString(imageIdBytes[:])
+
+			imageValues := map[string]string {
+				"SSG_IMAGE_NAME": image.name,
+				"SSG_PREV_IMAGE_PAGE_URL": prevPage,
+				"SSG_NEXT_IMAGE_PAGE_URL": nextPage,
+				"SSG_PRELOAD_URL": picToPreload,
+				"SSG_IMAGE_WIDTH": strconv.Itoa(image.width),
+				"SSG_IMAGE_HEIGHT": strconv.Itoa(image.height),
+				"SSG_IMAGE_URL": imageUrl,
+				"SSG_IMAGE_PAGE_URL": pageUrl,
+				"SSG_IMAGE_DISQUS_ID": imageId,
+				"SSG_IMAGE_THUMBNAIL_URL": imageThumbUrl,
+				"SSG_ORIG_IMAGE_URL": image.filename(),
+				"SSG_IMAGE_THUMBNAIL_WIDTH": strconv.Itoa(imageThumbImage.Bounds().Size().X),
+				"SSG_IMAGE_THUMBNAIL_HEIGHT": strconv.Itoa(imageThumbImage.Bounds().Size().Y),
+			}
+
+			imageTemplate.AddValues(galleryValues)
+			imageTemplate.AddValues(albumValues)
+			imageTemplate.AddValues(imageValues)
+
+			albumTemplate.AddItem(TemplateItem{ tag: "SSG_IMAGE_LIST_ITEM", values: imageValues})
+
+			imageTemplate.RenderHtml(filepath.Join(options.target, album.name, fmt.Sprintf("%s.html", image.name)))
+		}
+
+		albumTemplate.RenderHtml(filepath.Join(options.target, album.name, "index.html"))
+	}
+
+	galleryTemplate.RenderHtml(filepath.Join(options.target, "index.html"))
 }
 
 

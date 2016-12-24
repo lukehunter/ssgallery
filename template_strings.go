@@ -1,6 +1,6 @@
 package main
 
-var albumTemplate string = `
+var albumTemplateRaw string = `
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en" dir="ltr">
 <head>
@@ -55,7 +55,7 @@ var albumTemplate string = `
 </html>
 `
 
-var galleryTemplate string = `
+var galleryTemplateRaw string = `
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en" dir="ltr">
 <head>
@@ -111,7 +111,7 @@ var galleryTemplate string = `
 </html>
 `
 
-var imageTemplate string = `
+var imageTemplateRaw string = `
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en" dir="ltr">
 <head>
@@ -210,6 +210,7 @@ var imageTemplate string = `
 			        </div>
 
 			    </div>
+			    %SSG_DISQUS_REGION_START%
                 <div id="disqus_thread"></div>
                 <script type="text/javascript">
                     /**
@@ -217,8 +218,7 @@ var imageTemplate string = `
                     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
                     /*
                     var disqus_config = function () {
-                    this.page.url = %SSG_IMAGE_PAGE_URL%;  // Replace PAGE_URL with your page's canonical URL variable
-                    this.page.identifier = %SSG_IMAGE_ID%; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+                    this.page.identifier = %SSG_IMAGE_DISQUS_ID%; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
                     };
                     */
                     (function() { // DON'T EDIT BELOW THIS LINE
@@ -229,7 +229,7 @@ var imageTemplate string = `
                     })();
                 </script>
 			    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-
+			    %SSG_DISQUS_REGION_END%
 			</div>
 		</dl>
 	</div>

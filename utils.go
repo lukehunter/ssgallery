@@ -33,14 +33,13 @@ func getFileList(path string) []string {
 func getItemList(path string, includeDirs bool, includeFiles bool) []string {
     itemList := []string{}
 
-    err := filepath.Walk(options.source, func(path string, fi os.FileInfo, err error) error {
-        if includeDirs && fi.IsDir() {
-            append(itemList, path)
-            return nil
+    err := filepath.Walk(path, func(curPath string, fi os.FileInfo, err error) error {
+        if includeDirs && fi.IsDir() && curPath != options.source {
+            itemList = append(itemList, curPath)
         }
 
         if includeFiles && !fi.IsDir() {
-            append(itemList, path)
+            itemList = append(itemList, curPath)
         }
 
         return nil
@@ -59,19 +58,33 @@ func fileNameWithoutExtension(path string) string {
     return basename
 }
 
-func Copy(dst, src string) error {
+func Copy(src, dst string) error {
     in, err := os.Open(src)
     if err != nil { return err }
     defer in.Close()
+
     out, err := os.Create(dst)
     if err != nil { return err }
     defer out.Close()
+
+    fmt.Printf("Copying %s to %s", src, dst)
+
     _, err = io.Copy(out, in)
     cerr := out.Close()
     if err != nil { return err }
+
     return cerr
 }
 
 func formatFilename(imagename string, width, height int) string {
     return fmt.Sprintf("%s_%d_%d.jpg", imagename, width, height)
+}
+
+func stringInSlice(a string, list []string) bool {
+    for _, b := range list {
+        if b == a {
+            return true
+        }
+    }
+    return false
 }
