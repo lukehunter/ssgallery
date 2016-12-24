@@ -4,9 +4,35 @@ Stupidly Simple Gallery (ssgallery) is a command line based cross platform stati
 
 I created this software out of frustration with all the bloated and unnecessarily complicated gallery software out there. Would you believe that some gallery software actually waits until somebody requests a thumbnail to resize the source image? This strategy does not work well when using high resolution (10+ megapixel) source images. This software is designed to support as large of images as you like, pre-cache everything and be extremely simple (run it on a folder full of files, upload the result to your web host, and you're done).
 
-## Overview
+## Example Gallery
+See http://lukehunter.net/wallpapers/
 
-ssgallery uses an extremely basic template system to generate html pages. Tokens such as %SSG_GALLERY_NAME% are inserted into an html file, and at run-time are replaced with the correct strings. There is also support for lists of items (e.g. on the gallery and album pages), although the templating engine has not been heavily tested.
+## Usage
+
+The following is an example command line for ssgallery hosted at http://server/mywebgallery/:
+
+### Windows
+
+ssgallery.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery/" --disqus "//your-disqus-url.disqus.com/embed.js"
+
+### OSX/Linux
+
+./ssgallery_darwin_amd64 --source "/users/luke/pictures/gallery1" --target "~/Sites/vhost/mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
+
+## Download
+
+- [Windows](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_windows_386.exe)
+- [OSX](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_darwin_386)
+- [Linux](https://github.com/lukehunter/ssgallery/blob/master/bin/ssgallery_linux_386)
+- Other: See binaries checked in [here](https://github.com/lukehunter/ssgallery/tree/master/bin)
+
+--or-- if you have go installed
+
+go get github.com/lukehunter/ssgallery
+
+## Design
+
+ssgallery uses an extremely basic template system to generate html pages. Tokens such as %SSG_GALLERY_NAME% are inserted into an html file, and at run-time are replaced with the correct strings. There is also support for lists of items with nested tokens (e.g. on the gallery and album pages which show lists of thumbnails), although the templating engine has not been heavily tested with custom layouts (yet).
 
 An ssgallery theme consists of three templates:
 
@@ -22,34 +48,8 @@ An ssgallery theme consists of three templates:
   - Navigate forward and backward with onhover buttons
   - Navigate forward by clicking on the image
   
-## Example Gallery
-See http://lukehunter.net/wallpapers/
-
-## Download
-
-- [Windows](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_windows_386.exe)
-- [OSX](https://github.com/lukehunter/ssgallery/raw/master/bin/ssgallery_darwin_386)
-- [Linux](https://github.com/lukehunter/ssgallery/blob/master/bin/ssgallery_linux_386)
-- Other: See binaries checked in [here](https://github.com/lukehunter/ssgallery/tree/master/bin)
-
---or-- if you have go installed
-
-go get github.com/lukehunter/ssgallery
-
-## Usage
-
-The following is an example command line for ssgallery hosted at http://server/mywebgallery/:
-
-### Windows
-
-ssgallery.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery/" --disqus "//your-disqus-url.disqus.com/embed.js"
-
-### --future-- MacOS + Mono
-
-mono /Applications/ssgallery/ssgallery.exe --source "/Users/luke/Pictures/gallery1" --target "/srv/www/mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery/" --disqus "//your-disqus-url.disqus.com/embed.js"
-
 ## Input
-Input to ssgallery is a folder full of subfolders of files, with an optional thumbnail.jpg in each subfolder that will be used as the album cover photo (if thumbnail.jpg is not present the first image in the album will be used). In addition there are command line options to control thumbnail and image viewing sizes and to specify the base relative url.
+Input to ssgallery is a folder full of subfolders of files (currently a maximum of one level deep), with an optional thumbnail.jpg in each subfolder that will be used as the album cover photo (if thumbnail.jpg is not present the first image in the album will be used). In addition there are command line options to control thumbnail and image viewing sizes and to specify the base relative url.
 
 ## Output
 ssgallery writes a complete web page to the target folder. Image resizing is skipped if the resized image versions have a newer write time than the source images. Html pages will be overwritten if they have changed.
@@ -100,7 +100,7 @@ Disqus identifies comment pages using a page identifier and/or a page url (see: 
 
 ## todo
 - parallelization
-- testing (bad args, corrupt image, non-image, empty folder, nested folder)
+- testing (empty folder, nested folder)
 - remove unneeded html
 -   "       "    css
 - clean up url building
@@ -112,5 +112,4 @@ Disqus identifies comment pages using a page identifier and/or a page url (see: 
 - support nested albums
 - password protected albums
 - gapless gallery/album layout
-- mono support
 - more themes
