@@ -120,7 +120,7 @@ func runApp(c *cli.Context) error {
 	BuildGallery()
 	CopyResources()
 	masterAlbum.UpdateImageRenditions(options.target)
-	masterAlbum.UpdatePages(options.target)
+	masterAlbum.UpdatePages(options.target, options.baseurl)
 
 	fmt.Printf("%d files touched (not including contents of %s)", filesTouched, filepath.Join(options.target, "data"))
 
@@ -214,7 +214,7 @@ func SaveResizedImage(image *Image, width, height int, filename string, skipIfNe
         }
 
         if existingHash == resizedHash {
-            fmt.Printf("Skipping rendition, generated rendition has same md5sum as version on disk: %s\n", filename)
+            fmt.Printf("Skipping rendition, generated image has same md5sum as what is already in target folder (%s)\n", filename)
             return
         }
     }

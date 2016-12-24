@@ -192,11 +192,10 @@ func (a *Album)UpdateImageRenditions(targetPath string) {
     }
 }
 
-// todo: separate building/rendering of templates?
-func (a* Album)UpdatePages(targetPath string) {
+func (a* Album)UpdatePages(targetPhysicalPath, relativeUrl string) {
     albumTemplate := NewTemplate(albumTemplateRaw)
 
-    albumUrl := filepath.Join(targetPath, a.name)
+    albumUrl := relativeUrl
 
     albumValues := map[string]string {
         "SSG_ALBUM_NAME": a.name,
@@ -209,9 +208,10 @@ func (a* Album)UpdatePages(targetPath string) {
     albumTemplate.AddValues(albumValues);
 
     for _, subAlbum := range a.albums {
-        subAlbum.UpdatePages(filepath.Join(targetPath, subAlbum.name))
+        subAlbum.UpdatePages(filepath.Join(targetPhysicalPath, subAlbum.name),
+                                path.Join(relativeUrl, subAlbum.name))
 
-        albumThumb := filepath.Join(albumUrl, subAlbum.name, thumbnail)
+        albumThumb := filepath.Join(targetPhysicalPath, subAlbum.name, thumbnail)
         albumThumbImg, err := imaging.Open(albumThumb)
 
         if err != nil {
@@ -227,10 +227,7 @@ func (a* Album)UpdatePages(targetPath string) {
         }
 
         subAlbumTemplateItem := NewTemplateItem("SSG_ALBUM_LIST_ITEM")
-        subAlbumTemplateItem.values = subAlbumValues
-
-        subAlbumTemplateItem.AddValues(albumValues)
-        subAlbumTemplateItem.AddValues(subAlbumValues)
+        subAlbumTemplateItem.values = &subAlbumValues
 
         albumTemplate.AddItem(*subAlbumTemplateItem)
     }
@@ -264,7 +261,7 @@ func (a* Album)UpdatePages(targetPath string) {
             imageTemplate.SetHiddenRegion("SSG_DISQUS", false)
         }
 
-        imageThumb := filepath.Join(targetPath, cacheFolder,
+        imageThumb := filepath.Join(targetPhysicalPath, cacheFolder,
             formatFilename(image.name, options.thumbwidth, options.thumbheight))
         imageThumbImage, err := imaging.Open(imageThumb)
 
@@ -308,8 +305,13 @@ func (a* Album)UpdatePages(targetPath string) {
 
         albumTemplate.AddItem(*imageTemplateItem)
 
-        imageTemplate.RenderHtml(filepath.Join(targetPath, fmt.Sprintf("%s.html", image.name)))
+        imageTemplate.RenderHtml(filepath.Join(targetPhysicalPath, fmt.Sprintf("%s.html", image.name)))
     }
 
-    albumTemplate.RenderHtml(filepath.Join(targetPath, "index.html"))
+    targetPath := filepath.Join(targetPhysicalPath, "index.html")
+    if strings.HasSuffix(targetPath, "wallpapers/index.html") {
+        fmt.Println()
+    }
+
+    albumTemplate.RenderHtml(targetPath)
 }

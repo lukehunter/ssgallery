@@ -13,26 +13,26 @@ import (
 
 type TemplateItem struct {
     tag string
-    values map[string]string
+    values *map[string]string
 }
 
 func NewTemplateItem(tag string) *TemplateItem {
     ti := new(TemplateItem)
     ti.tag = tag
-    ti.values = map[string]string{}
+    ti.values = &map[string]string{}
     return ti
 }
 
 func (t *TemplateItem) AddValues(values map[string]string) {
     for k, v := range values {
-        t.values[k] = v
+        (*t.values)[k] = v
     }
 }
 
 type Template struct {
     rawHtml string
     values  map[string]string
-    lists   map[string][]TemplateItem
+    lists   map[string]*[]TemplateItem
 }
 
 func formatToken(s string) string {
@@ -43,7 +43,7 @@ func NewTemplate(rawHtml string) *Template {
     t := new(Template)
     t.rawHtml = rawHtml
     t.values = map[string]string{}
-    t.lists = make(map[string][]TemplateItem)
+    t.lists = make(map[string]*[]TemplateItem)
     return t
 }
 
@@ -54,7 +54,12 @@ func (t *Template) AddValues(values map[string]string) {
 }
 
 func (t *Template) AddItem(item TemplateItem) {
-    t.lists[item.tag] = append(t.lists[item.tag], item)
+    fmt.Println("adding item to ", item.tag)
+    if t.lists[item.tag] == nil {
+        t.lists[item.tag] = &[]TemplateItem{}
+    }
+    newList := append((*t.lists[item.tag])[:], item)
+    t.lists[item.tag] = &newList
 }
 
 func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
@@ -78,14 +83,13 @@ func (t *Template) SetHiddenRegion(regionTag string, hidden bool) {
 func (t *Template) RenderHtml(filename string) {
     rendered := t.RenderItems()
 
-    if strings.Contains(filename, "index.html") {
-        fmt.Println(rendered)
-    }
-
-    for k, v := range t.values {
-        token := formatToken(k)
-        rendered = strings.Replace(rendered, token, v, -1)
-    }
+    //fmt.Println("template values {")
+    //for k, v := range t.values {
+    //    fmt.Printf("%s : %s\n", k, v)
+    //    token := formatToken(k)
+    //    rendered = strings.Replace(rendered, token, v, -1)
+    //}
+    //fmt.Println("} end template values")
 
     renderedBytes := []byte(rendered)
 
@@ -114,38 +118,53 @@ func (t *Template) RenderHtml(filename string) {
 
 func (t *Template) RenderItems() string {
     if len(t.lists) == 0 {
+        fmt.Println("no template items")
         return t.rawHtml
+    }
+
+    for k,v := range t.lists {
+        fmt.Printf("%s: \n", k)
+        for _,item := range *v {
+            fmt.Printf("%s{", item.tag)
+            for k,v := range *item.values {
+                fmt.Printf("\n\t%s:%s", k, v)
+            }
+            fmt.Printf("}\n")
+        }
+        fmt.Printf("\n\n")
     }
 
     rendered := t.rawHtml
     var itemsHtml bytes.Buffer
 
-    // todo: delete item templates that are unused (e.g. album with no sub-albums, or no images)
     for tag,_ := range t.lists {
-        startTag := fmt.Sprintf("<!-- %%%s_START%% -->", tag)
-        endTag := fmt.Sprintf("<!-- %%%s_END%% -->", tag)
+        startTag := fmt.Sprintf("<!-- %%%s_START%%", tag)
+        endTag := fmt.Sprintf("%%%s_END%% -->", tag)
 
         startIndex := strings.Index(rendered, startTag)
 
         if startIndex < 0 {
             fmt.Println(rendered)
-            panic(errors.New(fmt.Sprintf("could not find item start tag %s", startTag)))
+            panic(errors.New(fmt.Sprintf("could not find item start tag %s in above template", startTag)))
         }
+
+        aboveItems := rendered[0:startIndex]
+        // offset templateStartIndex to skip past the actual tag
+        startIndex += len(startTag)
 
         endIndex := strings.Index(rendered, endTag)
 
         if endIndex < 0 {
             fmt.Println(rendered)
-            panic(errors.New(fmt.Sprintf("could not find item end tag %s", endTag)))
+            panic(errors.New(fmt.Sprintf("could not find item end tag %s in above template", endTag)))
         }
 
-        aboveItems := rendered[0:startIndex]
-        belowItems := rendered[endIndex:]
+        belowItems := rendered[endIndex + len(endTag):]
 
-        for _, tplItemList := range t.lists[tag] {
+        for _, tplItemList := range *(t.lists[tag]) {
             curItemTemplate := rendered[startIndex:endIndex]
 
-            for k,v := range tplItemList.values {
+            for k,v := range *tplItemList.values {
                 token := formatToken(k)
                 curItemTemplate = strings.Replace(curItemTemplate, token, v, -1)
             }
@@ -153,8 +172,6 @@ func (t *Template) RenderItems() string {
             itemsHtml.WriteString(curItemTemplate)
             itemsHtml.WriteString("\n")
         }
-
-        fmt.Println(itemsHtml.String())
 
         rendered = aboveItems + itemsHtml.String() + belowItems
 

@@ -19,9 +19,9 @@ var albumTemplateRaw string = `
 	<div id="the_page">
         <div class="titrePage" id="imageHeaderBar">
             <div class="browsePath">
-                <!-- %SSG_BREADCRUMB_LIST_ITEM_START% -->
+                <!-- %SSG_BREADCRUMB_LIST_ITEM_START%
                 <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a> /
-                <!-- %SSG_BREADCRUMB_LIST_ITEM_END% -->
+                %SSG_BREADCRUMB_LIST_ITEM_END% -->
                 %SSG_ALBUM_NAME%
             </div>
         </div>
@@ -30,7 +30,7 @@ var albumTemplateRaw string = `
 				<div id="subcontent">
 					<ul class="thumbnailCategories">
 
-					    <!-- %SSG_ALBUM_LIST_ITEM_START% -->
+					    <!-- %SSG_ALBUM_LIST_ITEM_START%
 					    <li onclick="window.location='%SSG_ALBUM_URL%';">
 						    <div class="thumbnailCategory">
 						        <div class="illustration">
@@ -45,9 +45,9 @@ var albumTemplateRaw string = `
 						        </div>
 						    </div>
 						</li>
-					    <!-- %SSG_ALBUM_LIST_ITEM_END%-->
+					    %SSG_ALBUM_LIST_ITEM_END% -->
 
-						<!-- %SSG_IMAGE_LIST_ITEM_START% -->
+						<!-- %SSG_IMAGE_LIST_ITEM_START%
 						<li onclick="window.location='%SSG_IMAGE_URL%';">
 						    <div class="thumbnailCategory">
 						        <div class="illustration">
@@ -62,7 +62,7 @@ var albumTemplateRaw string = `
 						        </div>
 						    </div>
 						</li>
-						<!-- %SSG_IMAGE_LIST_ITEM_END% -->
+						%SSG_IMAGE_LIST_ITEM_END% -->
 
 					</ul>
 				</div>
