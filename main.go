@@ -26,6 +26,12 @@ const cacheFolder = "cache"
 const dataFolder = "data"
 const filemode = 0755
 
+type Options struct {
+	name, source, target, baseurl, disqus              string
+	thumbwidth, thumbheight, viewerwidth, viewerheight int
+	skipextcheck, debug                                bool
+}
+
 var options Options
 var masterAlbum *Album
 var filesTouched int

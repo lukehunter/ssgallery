@@ -1,31 +1,13 @@
 package main
 
 import (
-	"crypto/md5"
-	"encoding/hex"
+	"path"
 	"fmt"
+	"path/filepath"
+	"strings"
 	"github.com/disintegration/imaging"
 	"os"
-	"path"
-	"path/filepath"
-	"strconv"
-	"strings"
 )
-
-type Options struct {
-	name, source, target, baseurl, disqus              string
-	thumbwidth, thumbheight, viewerwidth, viewerheight int
-	skipextcheck, debug                                bool
-}
-
-type Image struct {
-	name, sourcePath, targetPath                       string
-	thumbWidth, thumbHeight, viewerWidth, viewerHeight int
-}
-
-func (i *Image) filename() string {
-	return filepath.Base(i.sourcePath)
-}
 
 type Album struct {
 	name, folder, relUrl string
@@ -273,133 +255,4 @@ func (a *Album) UpdatePages(targetPhysicalPath, relativeUrl string) {
 	targetPath := filepath.Join(targetPhysicalPath, "index.html")
 
 	albumTemplate.RenderHtml(targetPath)
-}
-
-func UpdateSubAlbumPage(subAlbum *Album, albumTemplate *Template, targetPhysicalPath, relativeUrl, albumUrl string) {
-	albumPath := filepath.Join(targetPhysicalPath, subAlbum.name)
-	albumRelUrl := path.Join(relativeUrl, subAlbum.name)
-
-	subAlbum.UpdatePages(albumPath, albumRelUrl)
-
-	albumThumb := filepath.Join(targetPhysicalPath, subAlbum.name, thumbnail)
-	albumThumbImg, err := imaging.Open(albumThumb)
-
-	if err != nil {
-		fmt.Printf("Unable to open %s\n", albumThumb)
-		return
-	}
-
-	subAlbumValues := map[string]string{
-		"SSG_ALBUM_NAME":             subAlbum.name,
-		"SSG_ALBUM_URL":              filepath.Join(albumUrl, subAlbum.name),
-		"SSG_ALBUM_THUMBNAIL_WIDTH":  strconv.Itoa(albumThumbImg.Bounds().Size().X),
-		"SSG_ALBUM_THUMBNAIL_HEIGHT": strconv.Itoa(albumThumbImg.Bounds().Size().Y),
-	}
-
-	subAlbumTemplateItem := NewTemplateItem("SSG_ALBUM_LIST_ITEM")
-	subAlbumTemplateItem.values = &subAlbumValues
-
-	albumTemplate.AddItem(*subAlbumTemplateItem)
-}
-
-func UpdateImagePage(a *Album, albumValues map[string]string, albumTemplate *Template, image *Image, i int, targetPhysicalPath string ) {
-	imageTemplate := NewTemplate(imageTemplateRaw)
-	imageTemplateItem := NewTemplateItem("SSG_IMAGE_LIST_ITEM")
-
-	breadcrumbs := a.GetBreadcrumbs([]Album{})
-
-	for _, breadcrumb := range breadcrumbs {
-		breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
-
-		(*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumb.relUrl
-		(*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
-
-		imageTemplate.AddItem(*breadcrumbTemplateItem)
-	}
-
-	nextPage, prevPage, picToPreload := SetImageNextPrevLinks(i, a, imageTemplate)
-
-	imageUrl, pageUrl, imageId, imageThumbUrl, thumbWidth, thumbHeight :=
-		ReadImageMetadata(image, a, targetPhysicalPath)
-
-	imageValues := map[string]string{
-		"SSG_HOME_URL":               options.baseurl,
-		"SSG_IMAGE_NAME":             image.name,
-		"SSG_PREV_IMAGE_PAGE_URL":    prevPage,
-		"SSG_NEXT_IMAGE_PAGE_URL":    nextPage,
-		"SSG_PRELOAD_URL":            picToPreload,
-		"SSG_IMAGE_WIDTH":            strconv.Itoa(image.viewerWidth),
-		"SSG_IMAGE_HEIGHT":           strconv.Itoa(image.viewerHeight),
-		"SSG_IMAGE_URL":              imageUrl,
-		"SSG_IMAGE_PAGE_URL":         pageUrl,
-		"SSG_IMAGE_DISQUS_ID":        imageId,
-		"SSG_IMAGE_THUMBNAIL_URL":    imageThumbUrl,
-		"SSG_ORIG_IMAGE_URL":         image.filename(),
-		"SSG_IMAGE_THUMBNAIL_WIDTH":  strconv.Itoa(thumbWidth),
-		"SSG_IMAGE_THUMBNAIL_HEIGHT": strconv.Itoa(thumbHeight),
-	}
-
-	imageTemplate.AddValues(albumValues)
-	imageTemplate.AddValues(imageValues)
-	imageTemplateItem.AddValues(imageValues)
-
-	albumTemplate.AddItem(*imageTemplateItem)
-
-	imageTemplate.RenderHtml(filepath.Join(targetPhysicalPath, fmt.Sprintf("%s.html", image.name)))
-}
-
-func SetImageNextPrevLinks(i int, a *Album, imageTemplate *Template) (nextPage, prevPage, picToPreload string) {
-	if i > 0 {
-		prevPage = fmt.Sprintf("%s.html", a.images[i-1].name)
-		imageTemplate.SetHiddenRegion("SSG_PREV_IMAGE_LINK", false)
-	} else {
-		imageTemplate.SetHiddenRegion("SSG_PREV_IMAGE_LINK", true)
-	}
-
-	if i < len(a.images)-1 {
-		nextImage := a.images[i+1]
-		nextPage = fmt.Sprintf("%s.html", nextImage.name)
-		picToPreload = filepath.Join(cacheFolder, formatFilename(nextImage.name, options.viewerwidth, options.viewerheight))
-
-		imageTemplate.SetHiddenRegion("SSG_NEXT_IMAGE_LINK", false)
-	} else {
-		imageTemplate.SetHiddenRegion("SSG_NEXT_IMAGE_LINK", true)
-	}
-
-	if len(options.disqus) == 0 {
-		imageTemplate.SetHiddenRegion("SSG_DISQUS", true)
-	} else {
-		imageTemplate.SetHiddenRegion("SSG_DISQUS", false)
-	}
-
-	return nextPage, prevPage, picToPreload
-}
-
-func ReadImageMetadata(image *Image, a *Album, targetPhysicalPath string) (imageUrl, pageUrl, imageId, imageThumbUrl string, thumbWidth, thumbHeight int) {
-	imageThumb := filepath.Join(targetPhysicalPath, cacheFolder,
-		formatFilename(image.name, options.thumbwidth, options.thumbheight))
-	imageThumbImage, err := imaging.Open(imageThumb)
-
-	if err != nil {
-		fmt.Printf("Unable to open %s\n", imageThumb)
-		return
-	}
-
-	imageUrl = filepath.Join(cacheFolder, formatFilename(image.name, options.viewerwidth, options.viewerheight))
-	imageThumbUrl = filepath.Join(cacheFolder, formatFilename(image.name, options.thumbwidth, options.thumbheight))
-	pageUrl = fmt.Sprintf("%s.html", image.name)
-	imageIdBytes, err := hash_file_md5(image.sourcePath)
-
-	if err != nil {
-		fmt.Printf("Failed to calculate hash on %s (%s), falling back on gallery/album/image style ID for disqus", image.sourcePath, err.Error())
-		imageId := fmt.Sprintf("%s-%s-%s", a.GetBreadcrumbPath(""), a.name, image.name)
-		imageIdBytes = md5.Sum([]byte(imageId))
-	}
-
-	imageId = hex.EncodeToString(imageIdBytes[:])
-
-	thumbWidth = imageThumbImage.Bounds().Size().X
-	thumbHeight = imageThumbImage.Bounds().Size().Y
-
-	return imageUrl, pageUrl, imageId, imageThumbUrl, thumbWidth, thumbHeight
 }
