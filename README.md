@@ -85,7 +85,7 @@ ssgallery expects a folder structure like the following (it can have as many sub
       
 Note that album3 does not have a thumbnail.jpg -- in this case album3/image1.jpg will be used as the album3 thumbnail by default.
       
-### 2. Run ssgallery.exe
+### 2. Run ssgallery
 
 See above for usage instructions.
 
