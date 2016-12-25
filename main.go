@@ -154,7 +154,7 @@ func CopyResources() {
     RestoreAssets(options.target, "data")
 }
 
-func SaveResizedImage(img *Image, width, height int, filename string, isThumb, skipIfNewer bool) {
+func SaveResizedImage(imageInfo *Image, width, height int, filename string, isThumb, skipIfNewer bool) {
 	printErr := func(err error) {
 		fmt.Printf("SaveRezisedImage unexpected error: %s\n", err.Error())
 	}
@@ -163,16 +163,16 @@ func SaveResizedImage(img *Image, width, height int, filename string, isThumb, s
         newWidth := i.Bounds().Size().X
         newHeight := i.Bounds().Size().Y
         if isThumb {
-            img.thumbWidth, img.thumbHeight = newWidth, newHeight
+            imageInfo.thumbWidth, imageInfo.thumbHeight = newWidth, newHeight
         } else {
-            img.viewerWidth, img.viewerHeight = newWidth, newHeight
+            imageInfo.viewerWidth, imageInfo.viewerHeight = newWidth, newHeight
         }
     }
 
 	fileExists,_ := exists(filename)
 
 	if skipIfNewer && fileExists {
-		imageInfo, err := os.Stat(img.sourcePath)
+		imageInfo, err := os.Stat(imageInfo.sourcePath)
 		if err != nil {
 			printErr(err)
 			return
@@ -199,22 +199,22 @@ func SaveResizedImage(img *Image, width, height int, filename string, isThumb, s
 		}
 	}
 
-	fmt.Printf("Generating %dx%d for %s\n", width, height, img.name)
+	fmt.Printf("Generating %dx%d for %s\n", width, height, imageInfo.name)
 
-	imging, err := imaging.Open(img.sourcePath)
+	image, err := imaging.Open(imageInfo.sourcePath)
 
 	if err != nil {
 		printErr(err)
 		return
 	}
 
-    imging = imaging.Fit(imging, width, height, imaging.Lanczos)
+    image = imaging.Fit(image, width, height, imaging.Lanczos)
 
-    updateImageDimensions(imging)
+    updateImageDimensions(image)
 
     if fileExists {
         buf := new(bytes.Buffer)
-        err = imaging.Encode(buf, imging, imaging.JPEG)
+        err = imaging.Encode(buf, image, imaging.JPEG)
 
         if err != nil {
             printErr(err)
@@ -236,7 +236,7 @@ func SaveResizedImage(img *Image, width, height int, filename string, isThumb, s
         }
     }
 
-	err = imaging.Save(imging, filename)
+	err = imaging.Save(image, filename)
 
     if err != nil {
         printErr(err)
