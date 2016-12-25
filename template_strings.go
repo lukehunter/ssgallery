@@ -185,7 +185,7 @@ var imageTemplateRaw string = `
                     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
 
                     var disqus_config = function () {
-                    this.page.identifier = %SSG_IMAGE_DISQUS_ID%; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+                    this.page.identifier = '%SSG_IMAGE_DISQUS_ID%'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
                     };
 
                     (function() { // DON'T EDIT BELOW THIS LINE
