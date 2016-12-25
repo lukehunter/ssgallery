@@ -91,7 +91,7 @@ func runApp(c *cli.Context) error {
 	_ = os.Mkdir(options.target, filemode)
 	RestoreAssets(options.target, dataFolder)
 
-	masterAlbum = NewTopAlbum(options.name, options.source, options.baseurl, nil)
+	masterAlbum = NewRootAlbum(options.name, options.source, options.baseurl, nil)
 	masterAlbum.LoadAlbum(options.source)
 
 	if !masterAlbum.HasImages() {

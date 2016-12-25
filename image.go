@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"crypto/md5"
 	"encoding/hex"
+	"strings"
 )
 
 type Image struct {
@@ -30,6 +31,15 @@ func (i *Image) imageUrl() string {
 // Relative to album
 func (i *Image) thumbUrl() string {
 	return filepath.Join(cacheFolder, formatFilename(i.name, options.thumbwidth, options.thumbheight))
+}
+
+func ValidImage(filename string) bool {
+	_, err := imaging.Open(filename)
+	if err != nil {
+		fmt.Printf("Invalid image: %s (%s)\n", filename, err.Error())
+		return false
+	}
+	return true
 }
 
 func (i *Image) GetDisqusId(album *Album) string {
