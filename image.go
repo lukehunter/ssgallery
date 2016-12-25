@@ -50,7 +50,7 @@ func (i *Image) GetDisqusId(album *Album) string {
 		// if the file is moved. The compromoise is to only use the album and image name assuming it will stay in the
 		// direct containing folder.
 		imageId := fmt.Sprintf("%s-%s", album.name, i.name)
-		fmt.Printf("Failed to calculate hash on %s (%s), using md5 of %s for disqus ID", i.sourcePath, err.Error(), imageId)
+		fmt.Printf("Failed to calculate hash on %s (%s), using md5 of %s for disqus ID\n", i.sourcePath, err.Error(), imageId)
 		imageIdBytes = md5.Sum([]byte(imageId))
 	}
 

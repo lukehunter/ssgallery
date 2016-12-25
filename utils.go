@@ -80,10 +80,10 @@ func Copy(src, dst string) error {
 	outHash, outErr := hash_file_md5(dst)
 
 	if outErr == nil && inHash == outHash {
-		fmt.Printf("Skipping copy, %s has same md5sum as %s", src, dst)
+		fmt.Printf("Skipping copy, %s has same md5sum as %s\n", src, dst)
 		return nil
 	} else if outErr != nil {
-		fmt.Printf("Couldn't read hash for %s (%s), will attempt to copy", dst, outErr.Error())
+		fmt.Printf("Couldn't read hash for %s (%s), will attempt to copy\n", dst, outErr.Error())
 	}
 
 	in, err := os.Open(src)
