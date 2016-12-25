@@ -112,7 +112,7 @@ func (t *Template) RenderHtml(filename string) {
 
 	check(err)
 
-	filesTouched++
+	htmlFilesTouched++
 }
 
 func (t *Template) RenderItems() string {

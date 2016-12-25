@@ -106,7 +106,8 @@ func Copy(src, dst string) error {
 		return err
 	}
 
-	filesTouched++
+	// this function only used on images
+	imageFilesTouched++
 
 	return cerr
 }
@@ -218,5 +219,5 @@ func SaveResizedImage(imageInfo *Image, width, height int, filename string, isTh
 		printErr(err)
 	}
 
-	filesTouched++
+	imageFilesTouched++
 }

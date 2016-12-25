@@ -33,7 +33,7 @@ type Options struct {
 
 var options Options
 var masterAlbum *Album
-var filesTouched int
+var htmlFilesTouched, imageFilesTouched int
 
 func main() {
 	app := cli.NewApp()
@@ -62,7 +62,8 @@ func main() {
 }
 
 func runApp(c *cli.Context) error {
-	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
+	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg,
+		thumbheightarg, viewerwidtharg, viewerheightarg}
 
 	// Check required args
 	for _, arg := range args {
@@ -80,7 +81,8 @@ func runApp(c *cli.Context) error {
 
 	if !strings.HasPrefix(options.baseurl, "/") {
 		options.baseurl = fmt.Sprintf("/%s", options.baseurl)
-		fmt.Printf("Warning: baseurl does not include leading slash. I added one for you. New baseurl = '%s'\n", options.baseurl)
+		fmt.Printf("Warning: baseurl does not include leading slash. I added one for you. New baseurl = '%s'\n",
+			options.baseurl)
 	}
 
 	if exists, _ := exists(options.source); !exists {
@@ -101,7 +103,9 @@ func runApp(c *cli.Context) error {
 
 	RenderAlbumHtml(masterAlbum, options.target, options.baseurl)
 
-	fmt.Printf("%d files touched (not including contents of %s)\n", filesTouched, filepath.Join(options.target, dataFolder))
+	fmt.Printf("%d files touched (%d html, %d images), not including contents of %s\n",
+		htmlFilesTouched + imageFilesTouched, htmlFilesTouched, imageFilesTouched,
+		filepath.Join(options.target, dataFolder))
 
 	return nil
 }
