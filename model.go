@@ -236,7 +236,7 @@ func (a *Album) UpdatePages(targetPhysicalPath, relativeUrl string) {
 		"SSG_HOME_URL":   options.baseurl,
 		"SSG_ALBUM_URL":  albumUrl,
 		"SSG_DISQUS_URL": options.disqus,
-		"SSG_CSS_URL":    path.Join(options.baseurl, "data/ssgallery.css"),
+		"SSG_CSS_URL":    path.Join(options.baseurl, dataFolder, "ssgallery.css"),
 	}
 
 	albumTemplate.AddValues(albumValues)

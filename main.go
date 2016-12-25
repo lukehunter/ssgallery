@@ -23,6 +23,7 @@ const debugarg = "debug"
 
 const thumbnail = "thumbnail.jpg"
 const cacheFolder = "cache"
+const dataFolder = "data"
 const filemode = 0755
 
 var options Options
@@ -82,7 +83,7 @@ func runApp(c *cli.Context) error {
 	}
 
 	_ = os.Mkdir(options.target, filemode)
-	RestoreAssets(options.target, "data")
+	RestoreAssets(options.target, dataFolder)
 
 	masterAlbum = NewTopAlbum(options.name, options.source, options.baseurl, nil)
 	masterAlbum.LoadAlbum(options.source)
@@ -94,7 +95,7 @@ func runApp(c *cli.Context) error {
 	masterAlbum.UpdateImageRenditions(options.target)
 	masterAlbum.UpdatePages(options.target, options.baseurl)
 
-	fmt.Printf("%d files touched (not including contents of %s)\n", filesTouched, filepath.Join(options.target, "data"))
+	fmt.Printf("%d files touched (not including contents of %s)\n", filesTouched, filepath.Join(options.target, dataFolder))
 
 	return nil
 }
