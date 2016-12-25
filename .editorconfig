@@ -1,0 +1,9 @@
+root = true
+
+# Matches multiple files with brace expansion notation
+# Set default charset
+[*.{go,js,css,iml}]
+charset = utf-8
+indent_style = tab
+indent_size = 4
+trim_trailing_whitespace = true
