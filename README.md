@@ -40,7 +40,7 @@ An ssgallery theme consists of two templates:
 - Image
   - Shows single image at resolution specified on command line
   - Includes download and view links for original resolution
-  - Includes disqus comment area specific to the image
+  - Includes disqus comment area specific to the image (omitted if no disqus argument is provided)
   - Navigate forward and backward by swiping on tablets and phones
   - Navigate forward and backward with onhover buttons
   - Navigate forward by clicking on the image
