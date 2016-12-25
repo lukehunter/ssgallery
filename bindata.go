@@ -287,14 +287,14 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"data/ssgallery.css": dataSsgalleryCss,
-	"data/icon/img_next.png": dataIconImg_nextPng,
-	"data/icon/img_prev.png": dataIconImg_prevPng,
-	"data/icon/none.png": dataIconNonePng,
-	"data/js/17a7vez.js": dataJs17a7vezJs,
-	"data/js/3r5d4l.js": dataJs3r5d4lJs,
+	"data/ssgallery.css":            dataSsgalleryCss,
+	"data/icon/img_next.png":        dataIconImg_nextPng,
+	"data/icon/img_prev.png":        dataIconImg_prevPng,
+	"data/icon/none.png":            dataIconNonePng,
+	"data/js/17a7vez.js":            dataJs17a7vezJs,
+	"data/js/3r5d4l.js":             dataJs3r5d4lJs,
 	"data/js/jquery-migrate.min.js": dataJsJqueryMigrateMinJs,
-	"data/js/touchevents.js": dataJsToucheventsJs,
+	"data/js/touchevents.js":        dataJsToucheventsJs,
 }
 
 // AssetDir returns the file names below a certain
@@ -336,18 +336,19 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"data": &bintree{nil, map[string]*bintree{
 		"icon": &bintree{nil, map[string]*bintree{
 			"img_next.png": &bintree{dataIconImg_nextPng, map[string]*bintree{}},
 			"img_prev.png": &bintree{dataIconImg_prevPng, map[string]*bintree{}},
-			"none.png": &bintree{dataIconNonePng, map[string]*bintree{}},
+			"none.png":     &bintree{dataIconNonePng, map[string]*bintree{}},
 		}},
 		"js": &bintree{nil, map[string]*bintree{
-			"17a7vez.js": &bintree{dataJs17a7vezJs, map[string]*bintree{}},
-			"3r5d4l.js": &bintree{dataJs3r5d4lJs, map[string]*bintree{}},
+			"17a7vez.js":            &bintree{dataJs17a7vezJs, map[string]*bintree{}},
+			"3r5d4l.js":             &bintree{dataJs3r5d4lJs, map[string]*bintree{}},
 			"jquery-migrate.min.js": &bintree{dataJsJqueryMigrateMinJs, map[string]*bintree{}},
-			"touchevents.js": &bintree{dataJsToucheventsJs, map[string]*bintree{}},
+			"touchevents.js":        &bintree{dataJsToucheventsJs, map[string]*bintree{}},
 		}},
 		"ssgallery.css": &bintree{dataSsgalleryCss, map[string]*bintree{}},
 	}},
@@ -399,4 +400,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

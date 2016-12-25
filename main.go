@@ -1,17 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"crypto/md5"
+	"errors"
 	"fmt"
-	"os"
-	"github.com/urfave/cli"
-    "errors"
-    "path/filepath"
-    "strings"
 	"github.com/disintegration/imaging"
-    "path"
-    "crypto/md5"
-    "bytes"
-    "image"
+	"github.com/urfave/cli"
+	"image"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
 )
 
 const namearg = "name"
@@ -39,64 +39,64 @@ func main() {
 	app.Name = "ssgallery"
 	app.Usage = "stupidly simple gallery"
 
-    options = Options{}
+	options = Options{}
 
-	app.Flags = []cli.Flag {
+	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name: namearg,
-			Usage: "Set gallery name to `NAME`",
+			Name:        namearg,
+			Usage:       "Set gallery name to `NAME`",
 			Destination: &options.name,
 		},
 		cli.StringFlag{
-			Name: sourcearg,
-			Usage: "Read albums from `FOLDER`",
+			Name:        sourcearg,
+			Usage:       "Read albums from `FOLDER`",
 			Destination: &options.source,
 		},
 		cli.StringFlag{
-			Name: targetarg,
-			Usage: "Write web page to `FOLDER`",
+			Name:        targetarg,
+			Usage:       "Write web page to `FOLDER`",
 			Destination: &options.target,
 		},
 		cli.StringFlag{
-			Name: baseurlarg,
-			Usage: "Gallery will be hosted at http://server/`REL_URL`",
+			Name:        baseurlarg,
+			Usage:       "Gallery will be hosted at http://server/`REL_URL`",
 			Destination: &options.baseurl,
 		},
 		cli.StringFlag{
-			Name: disqusarg,
-			Usage: "[Optional] Custom `URL` for disqus topic (go to disqus.com to get one)",
+			Name:        disqusarg,
+			Usage:       "[Optional] Custom `URL` for disqus topic (go to disqus.com to get one)",
 			Destination: &options.disqus,
 		},
 		cli.IntFlag{
-			Name: thumbwidtharg,
-			Usage: "Set max thumbnail width to `WIDTH`",
+			Name:        thumbwidtharg,
+			Usage:       "Set max thumbnail width to `WIDTH`",
 			Destination: &options.thumbwidth,
 		},
 		cli.IntFlag{
-			Name: thumbheightarg,
-			Usage: "Set max thumbnail height to `HEIGHT`",
+			Name:        thumbheightarg,
+			Usage:       "Set max thumbnail height to `HEIGHT`",
 			Destination: &options.thumbheight,
 		},
 		cli.IntFlag{
-			Name: viewerwidtharg,
-			Usage: "Set max image viewer width to `WIDTH`",
+			Name:        viewerwidtharg,
+			Usage:       "Set max image viewer width to `WIDTH`",
 			Destination: &options.viewerwidth,
 		},
 		cli.IntFlag{
-			Name: viewerheightarg,
-			Usage: "Set max image viewer height to `HEIGHT`",
+			Name:        viewerheightarg,
+			Usage:       "Set max image viewer height to `HEIGHT`",
 			Destination: &options.viewerheight,
 		},
-        cli.BoolFlag{
-            Name: skipextcheckarg,
-            Usage: "Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)",
-            Destination: &options.skipextcheck,
-        },
-        cli.BoolFlag{
-            Name: debugarg,
-            Usage: "Enable debug logging",
-            Destination: &options.debug,
-        },
+		cli.BoolFlag{
+			Name:        skipextcheckarg,
+			Usage:       "Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)",
+			Destination: &options.skipextcheck,
+		},
+		cli.BoolFlag{
+			Name:        debugarg,
+			Usage:       "Enable debug logging",
+			Destination: &options.debug,
+		},
 	}
 
 	app.Action = runApp
@@ -107,15 +107,15 @@ func main() {
 func runApp(c *cli.Context) error {
 	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg, thumbheightarg, viewerwidtharg, viewerheightarg}
 
-	for _,arg := range args {
-		if (!c.IsSet(arg)) {
+	for _, arg := range args {
+		if !c.IsSet(arg) {
 			cli.ShowAppHelp(c)
 			return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
 		}
 	}
 
-	fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'" +
-																						"\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
+	fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'"+
+		"\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
 		options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
 		options.thumbheight, options.viewerwidth, options.viewerheight)
 
@@ -140,18 +140,18 @@ func runApp(c *cli.Context) error {
 }
 
 func BuildGallery() {
-    if exists, _ := exists(options.source); !exists {
-        panic(errors.New(fmt.Sprintf("could not find path %s", options.source)))
-    }
+	if exists, _ := exists(options.source); !exists {
+		panic(errors.New(fmt.Sprintf("could not find path %s", options.source)))
+	}
 
-    masterAlbum = NewTopAlbum(options.name, options.source, options.baseurl, nil)
+	masterAlbum = NewTopAlbum(options.name, options.source, options.baseurl, nil)
 
-    masterAlbum.LoadAlbum(options.source)
+	masterAlbum.LoadAlbum(options.source)
 }
 
 func CopyResources() {
-    _ = os.Mkdir(options.target, filemode)
-    RestoreAssets(options.target, "data")
+	_ = os.Mkdir(options.target, filemode)
+	RestoreAssets(options.target, "data")
 }
 
 func SaveResizedImage(imageInfo *Image, width, height int, filename string, isThumb, skipIfNewer bool) {
@@ -159,17 +159,17 @@ func SaveResizedImage(imageInfo *Image, width, height int, filename string, isTh
 		fmt.Printf("SaveRezisedImage unexpected error: %s\n", err.Error())
 	}
 
-    updateImageDimensions := func(i image.Image) {
-        newWidth := i.Bounds().Size().X
-        newHeight := i.Bounds().Size().Y
-        if isThumb {
-            imageInfo.thumbWidth, imageInfo.thumbHeight = newWidth, newHeight
-        } else {
-            imageInfo.viewerWidth, imageInfo.viewerHeight = newWidth, newHeight
-        }
-    }
+	updateImageDimensions := func(i image.Image) {
+		newWidth := i.Bounds().Size().X
+		newHeight := i.Bounds().Size().Y
+		if isThumb {
+			imageInfo.thumbWidth, imageInfo.thumbHeight = newWidth, newHeight
+		} else {
+			imageInfo.viewerWidth, imageInfo.viewerHeight = newWidth, newHeight
+		}
+	}
 
-	fileExists,_ := exists(filename)
+	fileExists, _ := exists(filename)
 
 	if skipIfNewer && fileExists {
 		imageInfo, err := os.Stat(imageInfo.sourcePath)
@@ -185,7 +185,7 @@ func SaveResizedImage(imageInfo *Image, width, height int, filename string, isTh
 
 		if imageInfo.ModTime().Before(existingInfo.ModTime()) {
 			// Still need to read the actual width and height for building html
-			existingRendition, err := imaging.Open(filename);
+			existingRendition, err := imaging.Open(filename)
 
 			if err != nil {
 				printErr(err)
@@ -208,39 +208,39 @@ func SaveResizedImage(imageInfo *Image, width, height int, filename string, isTh
 		return
 	}
 
-    image = imaging.Fit(image, width, height, imaging.Lanczos)
+	image = imaging.Fit(image, width, height, imaging.Lanczos)
 
-    updateImageDimensions(image)
+	updateImageDimensions(image)
 
-    if fileExists {
-        buf := new(bytes.Buffer)
-        err = imaging.Encode(buf, image, imaging.JPEG)
+	if fileExists {
+		buf := new(bytes.Buffer)
+		err = imaging.Encode(buf, image, imaging.JPEG)
 
-        if err != nil {
-            printErr(err)
-            return
-        }
+		if err != nil {
+			printErr(err)
+			return
+		}
 
-        existingHash, err := hash_file_md5(filename)
+		existingHash, err := hash_file_md5(filename)
 
-        if err != nil {
-            printErr(err)
-            return
-        }
+		if err != nil {
+			printErr(err)
+			return
+		}
 
-        resizedHash := md5.Sum(buf.Bytes())
+		resizedHash := md5.Sum(buf.Bytes())
 
-        if existingHash == resizedHash {
-            fmt.Printf("Skipping rendition, generated image has same md5sum as what is already in target folder (%s)\n", filename)
-            return
-        }
-    }
+		if existingHash == resizedHash {
+			fmt.Printf("Skipping rendition, generated image has same md5sum as what is already in target folder (%s)\n", filename)
+			return
+		}
+	}
 
 	err = imaging.Save(image, filename)
 
-    if err != nil {
-        printErr(err)
-    }
+	if err != nil {
+		printErr(err)
+	}
 
-    filesTouched++
+	filesTouched++
 }
