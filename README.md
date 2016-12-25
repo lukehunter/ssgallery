@@ -31,14 +31,12 @@ go get github.com/lukehunter/ssgallery
 
 ## Design
 
-ssgallery uses an extremely basic template system to generate html pages. Tokens such as %SSG_GALLERY_NAME% are inserted into an html file, and at run-time are replaced with the correct strings. There is also support for lists of items with nested tokens (e.g. on the gallery and album pages which show lists of thumbnails), although the templating engine has not been heavily tested with custom layouts (yet).
+ssgallery uses an extremely basic template system to generate html pages. Tokens such as %SSG_ALBUM_NAME% and %SSG_IMAGE_URL% are inserted into an html file, and at run-time are replaced with the correct strings. There is also support for lists of items with nested tokens (e.g. on the album page which shows lists of thumbnails), although the templating engine has not been heavily tested with custom layouts.
 
-An ssgallery theme consists of three templates:
+An ssgallery theme consists of two templates:
 
-- Gallery
-  - Shows list of albums
 - Album
-  - Shows list of images
+  - Shows list of albums and/or images
 - Image
   - Shows single image at resolution specified on command line
   - Includes download and view links for original resolution
@@ -48,16 +46,16 @@ An ssgallery theme consists of three templates:
   - Navigate forward by clicking on the image
   
 ## Input
-Input to ssgallery is a folder full of subfolders of files (currently a maximum of one level deep), with an optional thumbnail.jpg in each subfolder that will be used as the album cover photo (if thumbnail.jpg is not present the first image in the album will be used). In addition there are command line options to control thumbnail and image viewing sizes and to specify the base relative url.
+Input to ssgallery is a hierarchical folder structure, with an optional thumbnail.jpg in each folder that will be used as the album cover photo (if thumbnail.jpg is not present the first image in the album will be used). In addition there are command line options to control thumbnail and image viewing sizes and to specify the base relative url.
 
 ## Output
-ssgallery writes a complete web page to the target folder. Image resizing is skipped if the resized image versions have a newer write time than the source images. Html pages will be overwritten if they have changed.
+ssgallery writes a complete web page to the target folder. Files in the target folder are only touched if they have changed.
 
 The resulting folder can be transferred via FTP to a webhost. Since files that are up to date are not touched, using the "Overwrite if source file is newer" option in your FTP client (e.g. FileZilla) will make incremental updates faster.
 
 ## Deployment Steps
 ### 1. Prepare files
-ssgallery expects a folder structure like the following. It is recommended that all images (including thumbnail.jpg) be at the largest resolution you would like available for users to download. They will be resized for thumbnails and the image viewer depending on the provided command line arguments, and the original file will be available under the View/Download link on the Image page.
+ssgallery expects a folder structure like the following (it can have as many subfolders as you like). It is recommended that all images (including thumbnail.jpg) be at the largest resolution you would like available for users to download. They will be resized for thumbnails and the image viewer depending on the provided command line arguments, and the original file will be available under the View/Download link on the Image page.
 
 - pictures
   - gallery1
@@ -67,6 +65,13 @@ ssgallery expects a folder structure like the following. It is recommended that 
       - image2.jpg
       - image3.jpg
     - album2
+      - album2a
+        - image1.jpg
+        - image2.jpg
+      - album2b
+        - thumbnail.jpg
+        - image1.jpg
+        - image2.jpg
       - thumbnail.jpg 
       - image1.jpg
       - image2.jpg
@@ -75,6 +80,8 @@ ssgallery expects a folder structure like the following. It is recommended that 
       - image2.jpg
       - image3.jpg
       - image4.jpg
+    - image1.jpg
+    - image2.jpg
       
 Note that album3 does not have a thumbnail.jpg -- in this case album3/image1.jpg will be used as the album3 thumbnail by default.
       
@@ -93,23 +100,18 @@ Disqus identifies comment pages using a page identifier and/or a page url (see: 
 - Thumbnail sizes other than 170x130 are not currently supported. Some changes to the CSS are required.
 - There is no support for paging. Really large albums may not scale well since all thumbnails are on one page. 
 - Layout is a little small on mobile devices. Could use some responsive design.
-- If you run ssgallery multiple times and remove some images in between runs, you will end up with extra files in your destination folder. Over time this could grow and start wasting disk space. A simple workaround is to completely delete the target folder and re-generate from scratch occasionally.
+- If you run ssgallery multiple times and remove some images in between runs, you will end up with extra files in your destination folder that aren't linked in the gallery but are still present. Over time this could grow and start wasting disk space (and you may want removed images to disappear completely from the published gallery). A simple workaround is to completely delete the target folder and re-generate from scratch as needed.
 - Occasionally File.Copy throws an IOException related to disk space even when plenty of space is available. Setting the following registry key may help:
 
    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\IRPStackSize DWORD 0x0000000f (15) 
 
 ## todo
 - parallelization
-- testing (empty folder, nested folder)
 - remove unneeded html
 -   "       "    css
-- clean up url building
-- improve nav button ui in default template
-  - improve alignment
 - fix css to work with custom thumbnail sizes
 - download gallery/album links and zip files
-- remove extraneous files during generation (..hmm, yes/no/all warning?)
-- support nested albums
+- prompt to remove extraneous files at the end
 - password protected albums
 - gapless gallery/album layout
 - more themes
