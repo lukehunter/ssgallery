@@ -8,11 +8,60 @@ import (
 	"github.com/disintegration/imaging"
 )
 
-func UpdateSubAlbumPage(subAlbum *Album, albumTemplate *Template, targetPhysicalPath, relativeUrl, albumUrl string) {
+func RenderHtml(a *Album, targetPhysicalPath, relativeUrl string) {
+	if !a.HasImages() {
+		fmt.Printf("Skipping empty album '%s'\n", a.name)
+		return
+	}
+
+	albumTemplate := NewTemplate(albumTemplateRaw)
+
+	albumUrl := relativeUrl
+
+	albumValues := map[string]string{
+		"SSG_ALBUM_NAME": a.name,
+		"SSG_HOME_URL":   options.baseurl,
+		"SSG_ALBUM_URL":  albumUrl,
+		"SSG_DISQUS_URL": options.disqus,
+		"SSG_CSS_URL":    path.Join(options.baseurl, dataFolder, "ssgallery.css"),
+	}
+
+	albumTemplate.AddValues(albumValues)
+
+	if a.parent != nil {
+		breadcrumbs := a.parent.GetBreadcrumbs([]Album{})
+
+		for _, breadcrumb := range breadcrumbs {
+			breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
+
+			(*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumb.relUrl
+			(*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
+
+			albumTemplate.AddItem(*breadcrumbTemplateItem)
+		}
+	}
+
+	for _, subAlbum := range a.albums {
+		if subAlbum.name == "empty" {
+			fmt.Println()
+		}
+		RenderAlbumHtml(&subAlbum, albumTemplate, targetPhysicalPath, relativeUrl, albumUrl)
+	}
+
+	for i, image := range a.images {
+		RenderImageHtml(a, albumValues, albumTemplate, &image, i, targetPhysicalPath)
+	}
+
+	targetPath := filepath.Join(targetPhysicalPath, "index.html")
+
+	albumTemplate.RenderHtml(targetPath)
+}
+
+func RenderAlbumHtml(subAlbum *Album, albumTemplate *Template, targetPhysicalPath, relativeUrl, albumUrl string) {
 	albumPath := filepath.Join(targetPhysicalPath, subAlbum.name)
 	albumRelUrl := path.Join(relativeUrl, subAlbum.name)
 
-	subAlbum.UpdatePages(albumPath, albumRelUrl)
+	RenderHtml(subAlbum, albumPath, albumRelUrl)
 
 	albumThumb := filepath.Join(targetPhysicalPath, subAlbum.name, thumbnail)
 	albumThumbImg, err := imaging.Open(albumThumb)
@@ -35,7 +84,7 @@ func UpdateSubAlbumPage(subAlbum *Album, albumTemplate *Template, targetPhysical
 	albumTemplate.AddItem(*subAlbumTemplateItem)
 }
 
-func UpdateImagePage(a *Album, albumValues map[string]string, albumTemplate *Template, image *Image, i int, targetPhysicalPath string ) {
+func RenderImageHtml(a *Album, albumValues map[string]string, albumTemplate *Template, image *Image, i int, targetPhysicalPath string ) {
 	imageTemplate := NewTemplate(imageTemplateRaw)
 	imageTemplateItem := NewTemplateItem("SSG_IMAGE_LIST_ITEM")
 
@@ -52,8 +101,7 @@ func UpdateImagePage(a *Album, albumValues map[string]string, albumTemplate *Tem
 
 	nextPage, prevPage, picToPreload := SetNextPrev(i, a, imageTemplate)
 
-	imageUrl, pageUrl, imageId, imageThumbUrl, thumbWidth, thumbHeight :=
-		ReadImageMetadata(image, a, targetPhysicalPath)
+	thumbWidth, thumbHeight := image.GetThumbSize(targetPhysicalPath)
 
 	imageValues := map[string]string{
 		"SSG_HOME_URL":               options.baseurl,
@@ -63,10 +111,10 @@ func UpdateImagePage(a *Album, albumValues map[string]string, albumTemplate *Tem
 		"SSG_PRELOAD_URL":            picToPreload,
 		"SSG_IMAGE_WIDTH":            strconv.Itoa(image.viewerWidth),
 		"SSG_IMAGE_HEIGHT":           strconv.Itoa(image.viewerHeight),
-		"SSG_IMAGE_URL":              imageUrl,
-		"SSG_IMAGE_PAGE_URL":         pageUrl,
-		"SSG_IMAGE_DISQUS_ID":        imageId,
-		"SSG_IMAGE_THUMBNAIL_URL":    imageThumbUrl,
+		"SSG_IMAGE_URL":              image.imageUrl(),
+		"SSG_IMAGE_PAGE_URL":         image.pageUrl(),
+		"SSG_IMAGE_DISQUS_ID":        image.GetDisqusId(a),
+		"SSG_IMAGE_THUMBNAIL_URL":    image.thumbUrl(),
 		"SSG_ORIG_IMAGE_URL":         image.filename(),
 		"SSG_IMAGE_THUMBNAIL_WIDTH":  strconv.Itoa(thumbWidth),
 		"SSG_IMAGE_THUMBNAIL_HEIGHT": strconv.Itoa(thumbHeight),
