@@ -1,7 +1,6 @@
 package main
 
 import (
-	"path"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -9,18 +8,10 @@ import (
 )
 
 type Album struct {
-	name, folder, relUrl string
+	name, folder string
 	parent               *Album
 	albums               []Album
 	images               []Image
-}
-
-func NewRootAlbum(name, folder, relUrl string, parent *Album) *Album {
-	a := NewAlbum(name, folder, parent)
-
-	a.relUrl = relUrl
-
-	return a
 }
 
 func NewAlbum(name, folder string, parent *Album) *Album {
@@ -30,9 +21,6 @@ func NewAlbum(name, folder string, parent *Album) *Album {
 	a.parent = parent
 	a.albums = []Album{}
 	a.images = []Image{}
-	if a.parent != nil {
-		a.relUrl = path.Join(a.parent.relUrl, name)
-	}
 	return a
 }
 
@@ -78,7 +66,8 @@ func (a *Album) FindThumbnail() *Image {
 	return nil
 }
 
-func (a *Album) GetBreadcrumbs(albums []Album) []Album {
+// Traces path upward to root album. root is at 0 index of returned array.
+func (a *Album) GetAlbumPath(albums []Album) []Album {
 	albums = append(albums, *a)
 
 	if a.parent == nil {
@@ -86,7 +75,7 @@ func (a *Album) GetBreadcrumbs(albums []Album) []Album {
 		return reverse(albums)
 	}
 
-	return a.parent.GetBreadcrumbs(albums)
+	return a.parent.GetAlbumPath(albums)
 }
 
 func reverse(albums []Album) []Album {
@@ -95,16 +84,6 @@ func reverse(albums []Album) []Album {
 		albums[i], albums[j] = albums[j], albums[i]
 	}
 	return albums
-}
-
-func (a *Album) GetBreadcrumbPath(rest string) string {
-	rest = fmt.Sprintf("%s/%s", a.name, rest)
-
-	if a.parent == nil {
-		return rest
-	}
-
-	return a.parent.GetBreadcrumbPath(rest)
 }
 
 func (a *Album) LoadAlbum(path string) {

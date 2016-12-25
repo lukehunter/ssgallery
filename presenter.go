@@ -8,7 +8,7 @@ import (
 	"github.com/disintegration/imaging"
 )
 
-func RenderHtml(a *Album, targetPhysicalPath, relativeUrl string) {
+func RenderAlbumHtml(a *Album, targetPhysicalPath, relativeUrl string) {
 	if !a.HasImages() {
 		fmt.Printf("Skipping empty album '%s'\n", a.name)
 		return
@@ -29,23 +29,11 @@ func RenderHtml(a *Album, targetPhysicalPath, relativeUrl string) {
 	albumTemplate.AddValues(albumValues)
 
 	if a.parent != nil {
-		breadcrumbs := a.parent.GetBreadcrumbs([]Album{})
-
-		for _, breadcrumb := range breadcrumbs {
-			breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
-
-			(*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumb.relUrl
-			(*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
-
-			albumTemplate.AddItem(*breadcrumbTemplateItem)
-		}
+		RenderBreadcrumbHtml(a.parent, albumTemplate)
 	}
 
 	for _, subAlbum := range a.albums {
-		if subAlbum.name == "empty" {
-			fmt.Println()
-		}
-		RenderAlbumHtml(&subAlbum, albumTemplate, targetPhysicalPath, relativeUrl, albumUrl)
+		RenderAlbumThumbHtml(&subAlbum, albumTemplate, targetPhysicalPath, relativeUrl, albumUrl)
 	}
 
 	for i, image := range a.images {
@@ -57,11 +45,11 @@ func RenderHtml(a *Album, targetPhysicalPath, relativeUrl string) {
 	albumTemplate.RenderHtml(targetPath)
 }
 
-func RenderAlbumHtml(subAlbum *Album, albumTemplate *Template, targetPhysicalPath, relativeUrl, albumUrl string) {
+func RenderAlbumThumbHtml(subAlbum *Album, albumTemplate *Template, targetPhysicalPath, relativeUrl, albumUrl string) {
 	albumPath := filepath.Join(targetPhysicalPath, subAlbum.name)
 	albumRelUrl := path.Join(relativeUrl, subAlbum.name)
 
-	RenderHtml(subAlbum, albumPath, albumRelUrl)
+	RenderAlbumHtml(subAlbum, albumPath, albumRelUrl)
 
 	albumThumb := filepath.Join(targetPhysicalPath, subAlbum.name, thumbnail)
 	albumThumbImg, err := imaging.Open(albumThumb)
@@ -88,16 +76,7 @@ func RenderImageHtml(a *Album, albumValues map[string]string, albumTemplate *Tem
 	imageTemplate := NewTemplate(imageTemplateRaw)
 	imageTemplateItem := NewTemplateItem("SSG_IMAGE_LIST_ITEM")
 
-	breadcrumbs := a.GetBreadcrumbs([]Album{})
-
-	for _, breadcrumb := range breadcrumbs {
-		breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
-
-		(*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumb.relUrl
-		(*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
-
-		imageTemplate.AddItem(*breadcrumbTemplateItem)
-	}
+	RenderBreadcrumbHtml(a, imageTemplate)
 
 	nextPage, prevPage, picToPreload := SetNextPrev(i, a, imageTemplate)
 
@@ -129,6 +108,26 @@ func RenderImageHtml(a *Album, albumValues map[string]string, albumTemplate *Tem
 	albumTemplate.AddItem(*imageTemplateItem)
 
 	imageTemplate.RenderHtml(filepath.Join(targetPhysicalPath, fmt.Sprintf("%s.html", image.name)))
+}
+
+func RenderBreadcrumbHtml(a *Album, template *Template) {
+	breadcrumbs := a.GetAlbumPath([]Album{})
+
+	breadcrumbUrl := options.baseurl
+
+	for _, breadcrumb := range breadcrumbs {
+		breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
+
+		// skip the first album, its relurl is options.baseurl
+		if breadcrumb.parent != nil {
+			breadcrumbUrl = path.Join(breadcrumbUrl, breadcrumb.name)
+		}
+
+		(*breadcrumbTemplateItem.values)["SSG_ALBUM_URL"] = breadcrumbUrl
+		(*breadcrumbTemplateItem.values)["SSG_ALBUM_NAME"] = breadcrumb.name
+
+		template.AddItem(*breadcrumbTemplateItem)
+	}
 }
 
 func SetNextPrev(i int, a *Album, imageTemplate *Template) (nextPage, prevPage, picToPreload string) {

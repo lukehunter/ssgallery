@@ -91,7 +91,7 @@ func runApp(c *cli.Context) error {
 	_ = os.Mkdir(options.target, filemode)
 	RestoreAssets(options.target, dataFolder)
 
-	masterAlbum = NewRootAlbum(options.name, options.source, options.baseurl, nil)
+	masterAlbum = NewAlbum(options.name, options.source, nil)
 	masterAlbum.LoadAlbum(options.source)
 
 	if !masterAlbum.HasImages() {
@@ -100,7 +100,7 @@ func runApp(c *cli.Context) error {
 
 	masterAlbum.UpdateImageRenditions(options.target)
 
-	RenderHtml(masterAlbum, options.target, options.baseurl)
+	RenderAlbumHtml(masterAlbum, options.target, options.baseurl)
 
 	fmt.Printf("%d files touched (not including contents of %s)\n", filesTouched, filepath.Join(options.target, dataFolder))
 

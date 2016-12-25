@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"crypto/md5"
 	"encoding/hex"
-	"strings"
 )
 
 type Image struct {
