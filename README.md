@@ -94,7 +94,7 @@ See above for usage instructions.
 You're done!
 
 ## A Note about Disqus
-Disqus identifies comment pages using a page identifier and/or a page url (see: https://help.disqus.com/customer/portal/articles/472098-javascript-configuration-variables). ssgallery uses an md5 hash of the original source image for the identifier, and does not bother to provide a url. This means as long as the source image is not modified, the comments should still show up correctly even if the url changes. If you change domains after disqus comments have been entered, you may need to use the [Disqus migration tool](https://help.disqus.com/customer/portal/articles/286778-migration-tools) to move them.
+Disqus identifies comment pages using a page identifier and/or a page url (see: https://help.disqus.com/customer/portal/articles/472098-javascript-configuration-variables). ssgallery uses an md5 hash of the original source image for the identifier, and does not bother to provide a url. This means as long as the source image is not modified, the comments should still show up correctly even if the filename or url changes. If you change domains after disqus comments have been entered, you may need to use the [Disqus migration tool](https://help.disqus.com/customer/portal/articles/286778-migration-tools) to move them.
 
 ## known issues / limitations
 - Thumbnail sizes other than 170x130 are not currently supported. Some changes to the CSS are required.
