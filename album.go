@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	"github.com/disintegration/imaging"
 	"os"
 )
 
@@ -14,6 +13,14 @@ type Album struct {
 	parent               *Album
 	albums               []Album
 	images               []Image
+}
+
+func NewRootAlbum(name, folder, relUrl string, parent *Album) *Album {
+	a := NewAlbum(name, folder, parent)
+
+	a.relUrl = relUrl
+
+	return a
 }
 
 func NewAlbum(name, folder string, parent *Album) *Album {
@@ -26,14 +33,6 @@ func NewAlbum(name, folder string, parent *Album) *Album {
 	if a.parent != nil {
 		a.relUrl = path.Join(a.parent.relUrl, name)
 	}
-	return a
-}
-
-func NewTopAlbum(name, folder, relUrl string, parent *Album) *Album {
-	a := NewAlbum(name, folder, parent)
-
-	a.relUrl = relUrl
-
 	return a
 }
 
@@ -133,19 +132,16 @@ func (a *Album) LoadAlbum(path string) {
 				ext := strings.ToLower(filepath.Ext(image))
 
 				if !stringInSlice(ext, valid) {
-					fmt.Printf("Unrecognized file extension on %s, ignoring (accepted are %s, override this behavior with --%s)\n", image, strings.Join(valid, ", "), skipextcheckarg)
+					fmt.Printf("Unrecognized file extension on %s, ignoring. " +
+						"Accepted are %s, override this behavior with --%s\n",
+						image, strings.Join(valid, ", "), skipextcheckarg)
 					continue
 				}
 			}
 
-			_, err := imaging.Open(image)
-			if err != nil {
-				fmt.Printf("Unable to open %s, skipping (%s)\n", image, err.Error())
-				continue
+			if ValidImage(image) {
+				curAlbum.AddImage(Image{name: fileNameWithoutExtension(image), sourcePath: image})
 			}
-
-			curImage := Image{name: fileNameWithoutExtension(image), sourcePath: image}
-			curAlbum.AddImage(curImage)
 		}
 
 		a.AddAlbum(*curAlbum)
@@ -197,7 +193,7 @@ func (a *Album) UpdateImageRenditions(targetPath string) {
 	albumThumbnailPath := filepath.Join(a.folder, thumbnail)
 	targetAlbumThumbnailPath := filepath.Join(targetPath, thumbnail)
 
-	// Always generate album thumbnail -- otherwise if thumbnail.jpg is removed from source it will never be re-generated
+	// Always generate album thumbnail in case thumbnail.jpg removed
 	if exists, _ := exists(albumThumbnailPath); exists {
 		SaveResizedImage(&Image{name: fmt.Sprintf("%s thumbnail", a.name), sourcePath: albumThumbnailPath},
 			options.thumbwidth, options.thumbheight, targetAlbumThumbnailPath, true, false)
