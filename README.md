@@ -23,7 +23,7 @@ ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\gallery1" --target 
 - Windows [32-bit](http://lukehunter.net/ssgallery_release/ssgallery_windows_386.exe) | [64-bit](http://lukehunter.net/ssgallery_release/ssgallery_windows_amd64.exe)
 - OSX [32-bit](http://lukehunter.net/ssgallery_release/ssgallery_darwin_386) | [64-bit](http://lukehunter.net/ssgallery_release/ssgallery_darwin_amd64)
 - Linux [32-bit](http://lukehunter.net/ssgallery_release/ssgallery_linux_386) | [64-bit](http://lukehunter.net/ssgallery_release/ssgallery_linux_amd64)
-- Other: See binaries checked in [here](http://lukehunter.net/ssgallery_release)
+- Other: See binaries [here](http://lukehunter.net/ssgallery_release)
 
 --or-- if you have go installed
 
