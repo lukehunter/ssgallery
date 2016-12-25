@@ -12,7 +12,7 @@ The following is an example command line for a gallery hosted at http://server/m
 
 ### Windows
 
-ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery/" --disqus "//your-disqus-url.disqus.com/embed.js"
+ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
 
 ### OSX/Linux
 
