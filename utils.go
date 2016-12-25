@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"crypto/md5"
 	"fmt"
+	"github.com/disintegration/imaging"
+	"image"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -123,4 +128,95 @@ func printlnIfTrue(msg string, flag bool) {
 	if flag {
 		fmt.Println(msg)
 	}
+}
+
+func SaveResizedImage(imageInfo *Image, width, height int, filename string, isThumb, skipIfNewer bool) {
+	printErr := func(err error) {
+		fmt.Printf("SaveRezisedImage unexpected error: %s\n", err.Error())
+	}
+
+	updateImageDimensions := func(i image.Image) {
+		newWidth := i.Bounds().Size().X
+		newHeight := i.Bounds().Size().Y
+		if isThumb {
+			imageInfo.thumbWidth, imageInfo.thumbHeight = newWidth, newHeight
+		} else {
+			imageInfo.viewerWidth, imageInfo.viewerHeight = newWidth, newHeight
+		}
+	}
+
+	fileExists, _ := exists(filename)
+
+	if skipIfNewer && fileExists {
+		imageInfo, err := os.Stat(imageInfo.sourcePath)
+		if err != nil {
+			printErr(err)
+			return
+		}
+		existingInfo, err := os.Stat(filename)
+		if err != nil {
+			printErr(err)
+			return
+		}
+
+		if imageInfo.ModTime().Before(existingInfo.ModTime()) {
+			// Still need to read the actual width and height for building html
+			existingRendition, err := imaging.Open(filename)
+
+			if err != nil {
+				printErr(err)
+				return
+			}
+
+			updateImageDimensions(existingRendition)
+
+			fmt.Printf("Skipping resizing for %s (target's last write time is newer than source)\n", path.Base(filename))
+			return
+		}
+	}
+
+	fmt.Printf("Generating %dx%d for %s\n", width, height, imageInfo.name)
+
+	image, err := imaging.Open(imageInfo.sourcePath)
+
+	if err != nil {
+		printErr(err)
+		return
+	}
+
+	image = imaging.Fit(image, width, height, imaging.Lanczos)
+
+	updateImageDimensions(image)
+
+	if fileExists {
+		buf := new(bytes.Buffer)
+		err = imaging.Encode(buf, image, imaging.JPEG)
+
+		if err != nil {
+			printErr(err)
+			return
+		}
+
+		existingHash, err := hash_file_md5(filename)
+
+		if err != nil {
+			printErr(err)
+			return
+		}
+
+		resizedHash := md5.Sum(buf.Bytes())
+
+		if existingHash == resizedHash {
+			fmt.Printf("Skipping rendition, generated image has same md5sum as what is already in target folder (%s)\n", filename)
+			return
+		}
+	}
+
+	err = imaging.Save(image, filename)
+
+	if err != nil {
+		printErr(err)
+	}
+
+	filesTouched++
 }
