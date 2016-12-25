@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/urfave/cli"
 	"os"
@@ -85,7 +84,7 @@ func runApp(c *cli.Context) error {
 	}
 
 	if exists, _ := exists(options.source); !exists {
-		panic(errors.New(fmt.Sprintf("could not find path %s", options.source)))
+		panic(fmt.Errorf("could not find path %s", options.source))
 	}
 
 	_ = os.Mkdir(options.target, filemode)

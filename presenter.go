@@ -118,7 +118,7 @@ func RenderBreadcrumbHtml(a *Album, template *Template) {
 	for _, breadcrumb := range breadcrumbs {
 		breadcrumbTemplateItem := NewTemplateItem("SSG_BREADCRUMB_LIST_ITEM")
 
-		// skip the first album, its relurl is options.baseurl
+		// don't include the root album, its relurl is options.baseurl
 		if breadcrumb.parent != nil {
 			breadcrumbUrl = path.Join(breadcrumbUrl, breadcrumb.name)
 		}
