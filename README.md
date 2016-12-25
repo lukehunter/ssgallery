@@ -12,11 +12,11 @@ The following is an example command line for a gallery hosted at http://server/m
 
 ### Windows
 
-ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\gallery1" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
+ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
 
 ### OSX/Linux
 
-./ssgallery_darwin_amd64 --source "/users/luke/pictures/gallery1" --target "~/Sites/vhost/mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
+ssgallery_darwin_amd64 --source "/users/luke/pictures/" --target "~/Sites/vhost/mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
 
 ## Download
 
@@ -58,32 +58,31 @@ The resulting folder can be transferred via FTP to a webhost. Since files that a
 ssgallery expects a folder structure like the following (it can have as many subfolders as you like). It is recommended that all images (including thumbnail.jpg) be at the largest resolution you would like available for users to download. They will be resized for thumbnails and the image viewer depending on the provided command line arguments, and the original file will be available under the View/Download link on the Image page.
 
 - pictures
-  - gallery1
-    - album1
+  - album1
+    - thumbnail.jpg
+    - image1.jpg
+    - image2.jpg
+    - image3.jpg
+  - album2
+    - album2a
+      - image1.jpg
+      - image2.jpg
+    - album2b
       - thumbnail.jpg
       - image1.jpg
       - image2.jpg
-      - image3.jpg
-    - album2
-      - album2a
-        - image1.jpg
-        - image2.jpg
-      - album2b
-        - thumbnail.jpg
-        - image1.jpg
-        - image2.jpg
-      - thumbnail.jpg 
-      - image1.jpg
-      - image2.jpg
-    - album3
-      - image1.jpg
-      - image2.jpg
-      - image3.jpg
-      - image4.jpg
+    - thumbnail.jpg 
     - image1.jpg
     - image2.jpg
+  - album3
+    - image1.jpg
+    - image2.jpg
+    - image3.jpg
+    - image4.jpg
+  - image1.jpg
+  - image2.jpg
       
-Note that album3 does not have a thumbnail.jpg -- in this case album3/image1.jpg will be used as the album3 thumbnail by default.
+Note that album3 does not have a thumbnail.jpg -- in this case album3/image1.jpg will be used as the album3 thumbnail by default. Also if you happen to have extra files in these folders that aren't in a supported image format they will be ignored.
       
 ### 2. Run ssgallery
 
