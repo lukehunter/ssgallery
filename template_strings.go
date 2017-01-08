@@ -1,76 +1,95 @@
 package main
 
 var albumTemplateRaw string = `
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en" dir="ltr">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="generator" content="ssgallery">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="generator" content="ssgallery">
 
-	<meta name="description" content="%SSG_ALBUM_NAME%">
+    <meta name="description" content="%SSG_ALBUM_NAME%">
 
-	<title>%SSG_ALBUM_NAME%</title>
+    <title>%SSG_ALBUM_NAME%</title>
 
-	<link rel="stylesheet" type="text/css" href="%SSG_CSS_URL%">
-	<link rel="start" title="Home" href="%SSG_HOME_URL%" >
+
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+
+    <link rel="start" title="Home" href="%SSG_HOME_URL%" >
+
+    <style>
+        div.itemCaption {
+            font-size: 1rem;
+        }
+
+        div.header {
+            font-size: 2rem;
+        }
+    </style>
 </head>
+<body>
 
-<body id="theCategoryPage" class="  ntf   ats    ">
-	<div id="the_page">
-        <div class="titrePage" id="imageHeaderBar">
-            <div class="browsePath">
-                <!-- %SSG_BREADCRUMB_LIST_ITEM_START%
-                <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a> /
-                %SSG_BREADCRUMB_LIST_ITEM_END% -->
-                %SSG_ALBUM_NAME%
+<div class="header">
+            <!-- %SSG_BREADCRUMB_LIST_ITEM_START%
+            <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a>
+            %SSG_BREADCRUMB_LIST_ITEM_END% -->
+            %SSG_ALBUM_NAME%
+</div>
+
+<div class="container">
+
+    <div class="row">
+
+        <!-- %SSG_ALBUM_LIST_ITEM_START%
+        <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+            <div>
+                <div class="itemThumbnail">
+                    <a href="%SSG_ALBUM_URL%">
+                        <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="%SSG_ALBUM_THUMBNAIL_WIDTH%" height="%SSG_ALBUM_THUMBNAIL_HEIGHT%" alt="%SSG_ALBUM_NAME%">
+                    </a>
+                </div>
+                <div class="itemCaption">
+                    <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a>
+                </div>
             </div>
         </div>
-		<div id="content" >
-			<div id="content_cell">
-				<div id="subcontent">
-					<ul class="thumbnailCategories">
+        %SSG_ALBUM_LIST_ITEM_END% -->
 
-					    <!-- %SSG_ALBUM_LIST_ITEM_START%
-					    <li onclick="window.location='%SSG_ALBUM_URL%';">
-						    <div class="thumbnailCategory">
-						        <div class="illustration">
-						            <a href="%SSG_ALBUM_URL%">
-						                <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="%SSG_ALBUM_THUMBNAIL_WIDTH%" height="%SSG_ALBUM_THUMBNAIL_HEIGHT%" alt="%SSG_ALBUM_NAME%">
-						            </a>
-						        </div>
-						        <div class="description">
-						            <h3>
-						                <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a>
-						            </h3>
-						        </div>
-						    </div>
-						</li>
-					    %SSG_ALBUM_LIST_ITEM_END% -->
+        <!-- %SSG_IMAGE_LIST_ITEM_START%
+        <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+            <div>
+                <div class="itemThumbnail">
+                    <a href="%SSG_IMAGE_PAGE_URL%">
+                        <img src="%SSG_IMAGE_THUMBNAIL_URL%" width="%SSG_IMAGE_THUMBNAIL_WIDTH%" height="%SSG_IMAGE_THUMBNAIL_HEIGHT%" alt="%SSG_IMAGE_NAME%">
+                    </a>
+                </div>
+                <div class="itemCaption">
+                    <a href="%SSG_IMAGE_PAGE_URL%">%SSG_IMAGE_NAME%</a>
+                </div>
+            </div>
+        </div>
+        %SSG_IMAGE_LIST_ITEM_END% -->
 
-						<!-- %SSG_IMAGE_LIST_ITEM_START%
-						<li onclick="window.location='%SSG_IMAGE_URL%';">
-						    <div class="thumbnailCategory">
-						        <div class="illustration">
-						            <a href="%SSG_IMAGE_PAGE_URL%">
-						                <img src="%SSG_IMAGE_THUMBNAIL_URL%" width="%SSG_IMAGE_THUMBNAIL_WIDTH%" height="%SSG_IMAGE_THUMBNAIL_HEIGHT%" alt="%SSG_IMAGE_NAME%">
-						            </a>
-						        </div>
-						        <div class="description">
-						            <h3>
-						                <a href="%SSG_IMAGE_PAGE_URL%">%SSG_IMAGE_NAME%</a>
-						            </h3>
-						        </div>
-						    </div>
-						</li>
-						%SSG_IMAGE_LIST_ITEM_END% -->
+    </div>
 
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Footer -->
+    <!--<footer>-->
+        <!--<div class="row">-->
+            <!--<div class="col-lg-12">-->
+                <!--<p>%SSG_GALLERY_NAME%</p>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</footer>-->
+
 </div>
-</div>
+
+<!-- jQuery first, then Tether, then Bootstrap JS. -->
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 </body>
 </html>
 `

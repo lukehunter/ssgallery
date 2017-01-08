@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="generator" content="ssgallery">
+
+    <meta name="description" content="%SSG_ALBUM_NAME%">
+
+    <title>%SSG_ALBUM_NAME%</title>
+
+
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+
+    <link rel="start" title="Home" href="%SSG_HOME_URL%" >
+
+    <style>
+        div.itemCaption {
+            font-size: 1rem;
+        }
+
+        div.header {
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+        <ul class="navbar-nav mr-auto">
+            <!-- %SSG_BREADCRUMB_LIST_ITEM_START%
+            <li class="nav-item active">
+                <a class="nav-link" href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME <span class="sr-only">(current)</span></a>
+            </li>
+            %SSG_BREADCRUMB_LIST_ITEM_END% -->
+            <li class="nav-item">
+                %SSG_ALBUM_NAME%
+            </li>
+        </ul>
+</nav>
+
+<div class="container">
+
+    <div class="row">
+
+        <!-- %SSG_ALBUM_LIST_ITEM_START%
+        <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+            <div>
+                <div class="itemThumbnail">
+                    <a href="%SSG_ALBUM_URL%">
+                        <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="%SSG_ALBUM_THUMBNAIL_WIDTH%" height="%SSG_ALBUM_THUMBNAIL_HEIGHT%" alt="%SSG_ALBUM_NAME%">
+                    </a>
+                </div>
+                <div class="itemCaption">
+                    <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a>
+                </div>
+            </div>
+        </div>
+        %SSG_ALBUM_LIST_ITEM_END% -->
+
+        <!-- %SSG_IMAGE_LIST_ITEM_START%
+        <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+            <div>
+                <div class="itemThumbnail">
+                    <a href="%SSG_IMAGE_PAGE_URL%">
+                        <img src="%SSG_IMAGE_THUMBNAIL_URL%" width="%SSG_IMAGE_THUMBNAIL_WIDTH%" height="%SSG_IMAGE_THUMBNAIL_HEIGHT%" alt="%SSG_IMAGE_NAME%">
+                    </a>
+                </div>
+                <div class="itemCaption">
+                    <a href="%SSG_IMAGE_PAGE_URL%">%SSG_IMAGE_NAME%</a>
+                </div>
+            </div>
+        </div>
+        %SSG_IMAGE_LIST_ITEM_END% -->
+
+    </div>
+
+    <!-- Footer -->
+    <!--<footer>-->
+        <!--<div class="row">-->
+            <!--<div class="col-lg-12">-->
+                <!--<p>%SSG_GALLERY_NAME%</p>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</footer>-->
+
+</div>
+
+<!-- jQuery first, then Tether, then Bootstrap JS. -->
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+</body>
+</html>
