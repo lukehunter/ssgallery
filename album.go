@@ -118,7 +118,7 @@ func (a *Album) LoadAlbum(path string) {
 				}
 			}
 
-			if ValidImage(image) {
+			if !options.verifyimages || ValidImage(image) {
 				curAlbum.AddImage(Image{name: fileNameWithoutExtension(image), sourcePath: image})
 			}
 		}

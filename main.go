@@ -19,6 +19,7 @@ const viewerwidtharg = "viewerwidth"
 const viewerheightarg = "viewerheight"
 const skipextcheckarg = "skipextcheck"
 const debugarg = "debug"
+const verifyimagesarg = "verifyimages"
 
 const thumbnail = "thumbnail.jpg"
 const cacheFolder = "cache"
@@ -28,7 +29,7 @@ const filemode = 0755
 type Options struct {
 	name, source, target, baseurl, disqus              string
 	thumbwidth, thumbheight, viewerwidth, viewerheight int
-	skipextcheck, debug                                bool
+	skipextcheck, debug, verifyimages                  bool
 }
 
 var options Options
@@ -52,6 +53,7 @@ func main() {
 		cli.IntFlag{Name: thumbheightarg, Usage: "Set max thumbnail height to `HEIGHT`", Destination: &options.thumbheight},
 		cli.IntFlag{Name: viewerwidtharg, Usage: "Set max image viewer width to `WIDTH`", Destination: &options.viewerwidth},
 		cli.IntFlag{Name: viewerheightarg, Usage: "Set max image viewer height to `HEIGHT`", Destination: &options.viewerheight},
+		cli.BoolFlag{Name: verifyimagesarg, Usage: "Attempt to load each image first to ensure it is valid (may be dangerous in combination with --skipextcheck)", Destination: &options.verifyimages},
 		cli.BoolFlag{Name: skipextcheckarg, Usage: "Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)", Destination: &options.skipextcheck},
 		cli.BoolFlag{Name: debugarg, Usage: "Enable debug logging", Destination: &options.debug},
 	}
@@ -90,7 +92,11 @@ func runApp(c *cli.Context) error {
 	}
 
 	_ = os.Mkdir(options.target, filemode)
-	RestoreAssets(options.target, dataFolder)
+	err := RestoreAssets(options.target, dataFolder)
+
+	if err != nil {
+		return fmt.Errorf("Unable to restore assets")
+	}
 
 	masterAlbum = NewAlbum(options.name, options.source, nil)
 	masterAlbum.LoadAlbum(options.source)

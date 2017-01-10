@@ -24,6 +24,8 @@ func RenderAlbumHtml(a *Album, targetPhysicalPath, relativeUrl string) {
 		"SSG_ALBUM_URL":  albumUrl,
 		"SSG_DISQUS_URL": options.disqus,
 		"SSG_CSS_URL":    path.Join(options.baseurl, dataFolder, "ssgallery.css"),
+		"SSG_GALLERY_THUMBNAIL_WIDTH" : strconv.Itoa(options.thumbwidth),
+		"SSG_GALLERY_THUMBNAIL_HEIGHT" : strconv.Itoa(options.thumbheight),
 	}
 
 	albumTemplate.AddValues(albumValues)
@@ -61,7 +63,7 @@ func RenderAlbumThumbHtml(subAlbum *Album, albumTemplate *Template, targetPhysic
 
 	subAlbumValues := map[string]string{
 		"SSG_ALBUM_NAME":             subAlbum.name,
-		"SSG_ALBUM_URL":              filepath.Join(albumUrl, subAlbum.name),
+		"SSG_ALBUM_URL":              path.Join(albumUrl, subAlbum.name),
 		"SSG_ALBUM_THUMBNAIL_WIDTH":  strconv.Itoa(albumThumbImg.Bounds().Size().X),
 		"SSG_ALBUM_THUMBNAIL_HEIGHT": strconv.Itoa(albumThumbImg.Bounds().Size().Y),
 	}
