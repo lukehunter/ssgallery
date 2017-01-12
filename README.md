@@ -105,6 +105,8 @@ Disqus identifies comment pages using a page identifier and/or a page url (see: 
    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\IRPStackSize DWORD 0x0000000f (15) 
 
 ## todo
+- photoswipe integration
+- reasonable defaults for widths and heights (reduce number of required args)
 - parallelization
 - remove unneeded html
 -   "       "    css
