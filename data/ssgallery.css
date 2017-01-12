@@ -7,8 +7,6 @@ div.itemCaption {
 	display: table-cell;
 	text-align: center;
 	vertical-align: middle;
-	width: %SSG_GALLERY_THUMBNAIL_WIDTH%px;
-	height: %SSG_GALLERY_THUMBNAIL_HEIGHT%px;
 }
 .wraptocenter * {
   vertical-align: middle;
@@ -43,14 +41,16 @@ div.header {
 
 .nav_next_img {
   background-image: url('icon/img_next.png');
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
+  background-size: contain
 }
 
 .nav_prev_img {
   background-image: url('icon/img_prev.png');
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
+  background-size: contain
 }
 
 .nav_next:hover .nav_next_img {
@@ -59,4 +59,14 @@ div.header {
 
 .nav_prev:hover .nav_prev_img {
   background-image: url('icon/img_prev_hover.png');
+}
+
+.left-align {
+	position: absolute;
+	left: 0;
+}
+
+.right-align {
+	position: absolute;
+	right: 0
 }

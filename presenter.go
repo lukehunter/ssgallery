@@ -99,6 +99,7 @@ func RenderImageHtml(a *Album, albumValues map[string]string, albumTemplate *Tem
 		"SSG_ORIG_IMAGE_URL":         image.filename(),
 		"SSG_IMAGE_THUMBNAIL_WIDTH":  strconv.Itoa(thumbWidth),
 		"SSG_IMAGE_THUMBNAIL_HEIGHT": strconv.Itoa(thumbHeight),
+		"SSG_IMAGE_INDEX":            strconv.Itoa(i),
 	}
 
 	imageTemplate.SetHiddenRegion("SSG_DISQUS", len(options.disqus) == 0)

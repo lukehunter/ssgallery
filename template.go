@@ -136,18 +136,28 @@ func (t *Template) RenderItems() string {
 	}
 
 	rendered := t.rawHtml
-	var itemsHtml bytes.Buffer
 
 	for tag, _ := range t.lists {
 		startTag := fmt.Sprintf("<!-- %%%s_START%%", tag)
 		endTag := fmt.Sprintf("%%%s_END%% -->", tag)
+		startTagJs := fmt.Sprintf("/* %%%s_START%%", tag)
+		endTagJs := fmt.Sprintf("%%%s_END%% */", tag)
 
-		startIndex := strings.Index(rendered, startTag)
+		rendered = renderItemList(t, rendered, startTag, endTag, tag)
+		rendered = renderItemList(t, rendered, startTagJs, endTagJs, tag)
+	}
 
-		if startIndex < 0 {
-			fmt.Println(rendered)
-			panic(errors.New(fmt.Sprintf("could not find item start tag %s in above template", startTag)))
-		}
+	return rendered
+}
+
+func renderItemList(t *Template, renderedSoFar, startTag, endTag, tag string) string {
+	rendered := renderedSoFar
+
+	var itemsHtml bytes.Buffer
+
+	startIndex := strings.Index(rendered, startTag)
+
+	for startIndex >= 0 {
 
 		aboveItems := rendered[0:startIndex]
 		// offset templateStartIndex to skip past the actual tag
@@ -160,7 +170,7 @@ func (t *Template) RenderItems() string {
 			panic(errors.New(fmt.Sprintf("could not find item end tag %s in above template", endTag)))
 		}
 
-		belowItems := rendered[endIndex+len(endTag):]
+		belowItems := rendered[endIndex + len(endTag):]
 
 		for _, tplItemList := range *(t.lists[tag]) {
 			curItemTemplate := rendered[startIndex:endIndex]
@@ -177,6 +187,8 @@ func (t *Template) RenderItems() string {
 		rendered = aboveItems + itemsHtml.String() + belowItems
 
 		itemsHtml.Reset()
+
+		startIndex = strings.Index(rendered, startTag)
 	}
 
 	return rendered
