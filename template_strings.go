@@ -18,11 +18,11 @@ var albumTemplateRaw string = `
 
 	    <link rel="start" title="Home" href="%SSG_HOME_URL%" >
 
-	    <link rel="stylesheet" href="%SSG_HOME_URL%data/photoswipe.css">
-	    <script src="%SSG_HOME_URL%data/js/photoswipe.min.js"></script>
-	    <script src="%SSG_HOME_URL%data/js/photoswipe-ui-default.min.js"></script>
+	    <link rel="stylesheet" type="text/css" href="%SSG_HOME_URL%data/ssgallery.css">
 
-	    <link rel="stylesheet" type="text/css" href="%SSG_CSS_URL%">
+	    <link href="%SSG_HOME_URL%data/photoswipe.css" rel="stylesheet" />
+		<script src="%SSG_HOME_URL%data/photoswipe.min.js"></script>
+		<script src="%SSG_HOME_URL%data/photoswipe-ui-default.min.js"></script>
 
 	    <style>
 	        .thumbnailBox {

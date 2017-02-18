@@ -81,10 +81,18 @@ func runApp(c *cli.Context) error {
 		options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
 		options.thumbheight, options.viewerwidth, options.viewerheight)
 
+	// Ensure base url has leading and trailing slash
+	modified := false
 	if !strings.HasPrefix(options.baseurl, "/") {
 		options.baseurl = fmt.Sprintf("/%s", options.baseurl)
-		fmt.Printf("Warning: baseurl does not include leading slash. I added one for you. New baseurl = '%s'\n",
-			options.baseurl)
+		modified = true
+	}
+	if !strings.HasSuffix(options.baseurl, "/") {
+		options.baseurl = fmt.Sprintf("%s/", options.baseurl)
+		modified = true
+	}
+	if modified {
+		fmt.Printf("formatted baseurl: %s\n", options.baseurl)
 	}
 
 	if exists, _ := exists(options.source); !exists {
