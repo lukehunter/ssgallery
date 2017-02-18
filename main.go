@@ -44,18 +44,20 @@ func main() {
 	options = Options{}
 
 	app.Flags = []cli.Flag{
+		// Required
 		cli.StringFlag{Name: namearg, Usage: "Set gallery name to `NAME`", Destination: &options.name},
 		cli.StringFlag{Name: sourcearg, Usage: "Read albums from `FOLDER`", Destination: &options.source},
 		cli.StringFlag{Name: targetarg, Usage: "Write web page to `FOLDER`", Destination: &options.target},
 		cli.StringFlag{Name: baseurlarg, Usage: "Gallery will be hosted at http://server/`REL_URL`", Destination: &options.baseurl},
+		// Optional
 		cli.StringFlag{Name: disqusarg, Usage: "[Optional] Custom `URL` for disqus topic (go to disqus.com to get one)", Destination: &options.disqus},
-		cli.IntFlag{Name: thumbwidtharg, Usage: "Set max thumbnail width to `WIDTH`", Destination: &options.thumbwidth},
-		cli.IntFlag{Name: thumbheightarg, Usage: "Set max thumbnail height to `HEIGHT`", Destination: &options.thumbheight},
-		cli.IntFlag{Name: viewerwidtharg, Usage: "Set max image viewer width to `WIDTH`", Destination: &options.viewerwidth},
-		cli.IntFlag{Name: viewerheightarg, Usage: "Set max image viewer height to `HEIGHT`", Destination: &options.viewerheight},
-		cli.BoolFlag{Name: verifyimagesarg, Usage: "Attempt to load each image first to ensure it is valid (may be dangerous in combination with --skipextcheck)", Destination: &options.verifyimages},
-		cli.BoolFlag{Name: skipextcheckarg, Usage: "Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)", Destination: &options.skipextcheck},
-		cli.BoolFlag{Name: debugarg, Usage: "Enable debug logging", Destination: &options.debug},
+		cli.IntFlag{Name: thumbwidtharg, Usage: "[Optional] Set max thumbnail width to `WIDTH`", Destination: &options.thumbwidth},
+		cli.IntFlag{Name: thumbheightarg, Usage: "[Optional] Set max thumbnail height to `HEIGHT`", Destination: &options.thumbheight},
+		cli.IntFlag{Name: viewerwidtharg, Usage: "[Optional] Set max image viewer width to `WIDTH`", Destination: &options.viewerwidth},
+		cli.IntFlag{Name: viewerheightarg, Usage: "[Optional] Set max image viewer height to `HEIGHT`", Destination: &options.viewerheight},
+		cli.BoolFlag{Name: verifyimagesarg, Usage: "[Optional] Attempt to load each image first to ensure it is valid (may be dangerous in combination with --skipextcheck)", Destination: &options.verifyimages},
+		cli.BoolFlag{Name: skipextcheckarg, Usage: "[Optional] Skip the check that limits to known supported file extensions (may include more images but may be slower if there are non-image files in the source folder)", Destination: &options.skipextcheck},
+		cli.BoolFlag{Name: debugarg, Usage: "[Optional] Enable debug logging", Destination: &options.debug},
 	}
 
 	app.Action = runApp
@@ -64,18 +66,43 @@ func main() {
 }
 
 func runApp(c *cli.Context) error {
-	var args []string = []string{namearg, sourcearg, targetarg, baseurlarg, thumbwidtharg,
-		thumbheightarg, viewerwidtharg, viewerheightarg}
+	var requiredArgs []string = []string{namearg, sourcearg, targetarg, baseurlarg}
 
 	// Check required args
-	for _, arg := range args {
+	for _, arg := range requiredArgs {
 		if !c.IsSet(arg) {
 			cli.ShowAppHelp(c)
 			return cli.NewExitError(fmt.Sprintf("\n\nArgument '%s' is required", arg), 1)
 		}
 	}
 
-	// Print back what the user entered
+	// Defaults for optional args
+	if !c.IsSet(disqusarg) {
+		options.disqus = ""
+	}
+	if !c.IsSet(thumbwidtharg) {
+		options.thumbwidth = 170
+	}
+	if !c.IsSet(thumbheightarg) {
+		options.thumbheight = 130
+	}
+	if !c.IsSet(viewerwidtharg) {
+		options.viewerwidth = 1500
+	}
+	if !c.IsSet(viewerheightarg) {
+		options.viewerheight = 1000
+	}
+	if !c.IsSet(verifyimagesarg) {
+		options.verifyimages = false
+	}
+	if !c.IsSet(skipextcheckarg) {
+		options.skipextcheck = false
+	}
+	if !c.IsSet(debugarg) {
+		options.debug = false
+	}
+
+	// Print back what will be used
 	fmt.Printf("\narguments:\nname: '%s'\nsource: '%s'\ntarget: '%s'\nbaseurl: '%s'\ndisqus: '%s'"+
 		"\nthumbwidth: %d\nthumbheight: %d\nviewerwidth: %d\nviewerheight: %d\n",
 		options.name, options.source, options.target, options.baseurl, options.disqus, options.thumbwidth,
