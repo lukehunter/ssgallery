@@ -1,0 +1,36 @@
+https://github.com/llgcode/draw2d/
+https://blog.golang.org/go-imagedraw-package
+http://stackoverflow.com/questions/28992396/draw-a-rectangle-in-golang
+https://code.google.com/archive/p/graphics-go/
+
+canvas
+{
+	width
+	height
+
+	layer(x,y,theta,opacity)
+	{
+		dropshadow(offsetx, offsety, feather)
+		{
+			border(thickness)
+			{
+				image(imagedata, width, height)
+			}
+		}
+	}
+	...
+}
+
+image(theta)
+{
+	backdrops
+	{
+		roundtangle
+		dropshadow
+	}
+}
+
+render pass
+  determine sizes
+draw pass
+  draw everything

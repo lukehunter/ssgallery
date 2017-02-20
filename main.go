@@ -81,10 +81,10 @@ func runApp(c *cli.Context) error {
 		options.disqus = ""
 	}
 	if !c.IsSet(thumbwidtharg) {
-		options.thumbwidth = 170
+		options.thumbwidth = 500
 	}
 	if !c.IsSet(thumbheightarg) {
-		options.thumbheight = 130
+		options.thumbheight = 500
 	}
 	if !c.IsSet(viewerwidtharg) {
 		options.viewerwidth = 1500

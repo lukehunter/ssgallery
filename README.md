@@ -8,15 +8,7 @@ I created this software out of frustration with all the bloated and unnecessaril
 See http://lukehunter.net/wallpapers/
 
 ## Usage
-The following is an example command line for a gallery hosted at http://server/mywebgallery/:
-
-### Windows
-
-ssgallery_windows_amd64.exe --source "C:\Users\luke\pictures\" --target "c:\inetpub\wwwroot\mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
-
-### OSX/Linux
-
-ssgallery_darwin_amd64 --source "/users/luke/pictures/" --target "~/Sites/vhost/mywebgallery" --name "My Web Gallery" --thumbwidth 170 --thumbheight 130 --viewerwidth 1500 --viewerheight 1000 --baseurl "/mywebgallery" --disqus "//your-disqus-url.disqus.com/embed.js"
+ssgallery --source ".\pictures\" --target ".\gallery" --name "My Web Gallery" --baseurl "/mywebgallery"
 
 ## Download
 
@@ -31,20 +23,16 @@ go get github.com/lukehunter/ssgallery
 
 ## Design
 
-ssgallery uses an extremely basic template system to generate html pages. Tokens such as %SSG_ALBUM_NAME% and %SSG_IMAGE_URL% are inserted into an html file, and at run-time are replaced with the correct strings. There is also support for lists of items with nested tokens (e.g. on the album page which shows lists of thumbnails), although the templating engine has not been heavily tested with custom layouts.
+ssgallery uses a template system to generate html pages. Tokens such as %SSG_ALBUM_NAME% and %SSG_IMAGE_URL% are inserted into an html file, and at run-time are replaced with the correct strings. There is also support for lists of items with nested tokens (e.g. on the album page which shows lists of thumbnails), although the templating engine has not been heavily tested with custom layouts.
 
 An ssgallery theme consists of two templates:
 
 - Album
   - Shows list of albums and/or images
-- Image
-  - Shows single image at resolution specified on command line
-  - Includes download and view links for original resolution
-  - Includes disqus comment area specific to the image (omitted if no disqus argument is provided)
-  - Navigate forward and backward by swiping on tablets and phones
-  - Navigate forward and backward with onhover buttons
-  - Navigate forward by clicking on the image
-  
+  - Contains Photoswipe js gallery code (see http://www.photoswipe.com )
+- Image (only used if no js)
+  - Shows single image at viewer resolution specified on command line with js-free navigation
+
 ## Input
 Input to ssgallery is a hierarchical folder structure, with an optional thumbnail.jpg in each folder that will be used as the album cover photo (if thumbnail.jpg is not present the first image in the album will be used). In addition there are command line options to control thumbnail and image viewing sizes and to specify the base relative url.
 
@@ -55,7 +43,7 @@ The resulting folder can be transferred via FTP to a webhost. Since files that a
 
 ## Deployment Steps
 ### 1. Prepare files
-ssgallery expects a folder structure like the following (it can have as many subfolders as you like). It is recommended that all images (including thumbnail.jpg) be at the largest resolution you would like available for users to download. They will be resized for thumbnails and the image viewer depending on the provided command line arguments, and the original file will be available under the View/Download link on the Image page.
+ssgallery expects a folder structure like the following (it can have as many subfolders as you like). It is recommended that all images (including thumbnail.jpg) be at the largest resolution you would like available for users to download. They will be resized and cached for thumbnails and the image viewer, and the original file will be available under the View/Download link on the Image page.
 
 - pictures
   - album1
@@ -97,22 +85,19 @@ Disqus identifies comment pages using a page identifier and/or a page url (see: 
 
 ## known issues / limitations
 - Thumbnail sizes other than 170x130 are not currently supported. Some changes to the CSS are required.
-- There is no support for paging. Really large albums may not scale well since all thumbnails are on one page. 
-- Layout is a little small on mobile devices. Could use some responsive design.
+- There is no support for paging. Really large albums may not scale well since all thumbnails are on one page.
 - If you run ssgallery multiple times and remove some images in between runs, you will end up with extra files in your destination folder that aren't linked in the gallery but are still present. Over time this could grow and start wasting disk space (and you may want removed images to disappear completely from the published gallery). A simple workaround is to completely delete the target folder and re-generate from scratch as needed.
 - Occasionally File.Copy throws an IOException related to disk space even when plenty of space is available. Setting the following registry key may help:
 
    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\IRPStackSize DWORD 0x0000000f (15) 
 
 ## todo
-- photoswipe integration
-- reasonable defaults for widths and heights (reduce number of required args)
-- parallelization
-- remove unneeded html
--   "       "    css
-- fix css to work with custom thumbnail sizes
+- refine gapless layout (no frills css approach?)
+- improve album thumbnail autogeneration (photo stack)
+- allow specifying sort options for albums/folders (including dictionary number sorting, and reverse option)
+- paging (specify max images per page, default ~100. url scheme?)
 - download gallery/album links and zip files
 - prompt to remove extraneous files at the end
 - password protected albums
-- gapless gallery/album layout
-- more themes
+- re-integrate disqus
+- parallelization

@@ -20,6 +20,7 @@ var albumTemplateRaw string = `
 
 	    <link rel="stylesheet" type="text/css" href="%SSG_HOME_URL%data/ssgallery.css">
 	    <link rel="stylesheet" type="text/css" href="%SSG_HOME_URL%data/default-skin/default-skin.css">
+	    <link rel="stylesheet" type="text/css" href="%SSG_HOME_URL%data/flexbin.css">
 
 	    <link href="%SSG_HOME_URL%data/photoswipe.css" rel="stylesheet" />
 		<script src="%SSG_HOME_URL%data/photoswipe.min.js"></script>
@@ -27,13 +28,13 @@ var albumTemplateRaw string = `
 
 	    <style>
 	        .thumbnailBox {
-	            width: %SSG_GALLERY_THUMBNAIL_WIDTH%px;
-	            height: %SSG_GALLERY_THUMBNAIL_HEIGHT%px;
+	            width: 170px;
+	            height: 130px;
 	        }
 	    </style>
 	</head>
 	<body>
-		<div class="container-fluid">
+		<div class="container-fluid" style="width: 75%; padding-left: 0px; padding-right: 0px">
 			<div class="header">
 			            <!-- %SSG_BREADCRUMB_LIST_ITEM_START%
 			            <a href="%SSG_ALBUM_URL%">%SSG_ALBUM_NAME%</a> /
@@ -41,14 +42,14 @@ var albumTemplateRaw string = `
 			            %SSG_ALBUM_NAME%
 			</div>
 			<hr style="margin-top: 0" />
-		    <div class="row gallery">
+		    <div class="row">
 
 		        <!-- %SSG_ALBUM_LIST_ITEM_START%
 		        <div class="col-xl-2 col-lg-3 col-md-4 col-xs-6 thumb" style="text-align: center; margin-bottom: 20px">
 		            <div class="wraptocenter" style="display: inline-block">
 		                <div class="wraptocenter thumbnailBox">
 		                    <a href="%SSG_ALBUM_URL%">
-		                        <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="%SSG_ALBUM_THUMBNAIL_WIDTH%" height="%SSG_ALBUM_THUMBNAIL_HEIGHT%" alt="%SSG_ALBUM_NAME%">
+		                        <img src="%SSG_ALBUM_NAME%/thumbnail.jpg" width="170px" height="130px" alt="%SSG_ALBUM_NAME%">
 		                    </a>
 		                </div>
 		                <hr style="margin:5px" />
@@ -58,24 +59,26 @@ var albumTemplateRaw string = `
 		            </div>
 		        </div>
 		        %SSG_ALBUM_LIST_ITEM_END% -->
-
-		        <!-- %SSG_IMAGE_LIST_ITEM_START%
-		        <div class="col-xl-2 col-lg-3 col-md-4 col-xs-6 thumb" data-size="%SSG_IMAGE_WIDTH%x%SSG_IMAGE_HEIGHT%" data-url="%SSG_IMAGE_URL%" data-thumb-url="%SSG_IMAGE_THUMBNAIL_URL%" data-title="%SSG_IMAGE_NAME%" data-index="%SSG_IMAGE_INDEX%" style="text-align: center; margin-bottom: 20px">
-		            <div class="wraptocenter" style="display: inline-block">
-		                <div class="wraptocenter thumbnailBox">
-		                    <a href="%SSG_IMAGE_PAGE_URL%">
-		                        <img src="%SSG_IMAGE_THUMBNAIL_URL%" width="%SSG_IMAGE_THUMBNAIL_WIDTH%" height="%SSG_IMAGE_THUMBNAIL_HEIGHT%" alt="%SSG_IMAGE_NAME%">
-		                    </a>
-		                </div>
-		                <hr style="margin:5px" />
-		                <div class="itemCaption" style="margin:0">
-		                    <a href="%SSG_IMAGE_PAGE_URL%">%SSG_IMAGE_NAME%</a>
-		                </div>
-		            </div>
-		        </div>
-		        %SSG_IMAGE_LIST_ITEM_END% -->
-
 		    </div>
+		</div>
+		<div style="width: 75%; margin: auto">
+	        <div class="flexbin flexbin-margin gallery">
+		        <!-- %SSG_IMAGE_LIST_ITEM_START%
+	                <a
+	                    href="%SSG_IMAGE_PAGE_URL%"
+	                    data-url="%SSG_IMAGE_URL%"
+	                    data-size="%SSG_IMAGE_WIDTH%x%SSG_IMAGE_HEIGHT%"
+	                    data-thumb-url="%SSG_IMAGE_THUMBNAIL_URL%"
+	                    data-title="%SSG_IMAGE_NAME%"
+	                    data-index="%SSG_IMAGE_INDEX%">
+
+	                    <img
+	                        src="%SSG_IMAGE_THUMBNAIL_URL%"
+	                        alt="%SSG_IMAGE_NAME%">
+
+	                </a>
+		        %SSG_IMAGE_LIST_ITEM_END% -->
+			</div>
 		</div>
 
 		<!-- Root element of PhotoSwipe. Must have class pswp. -->
@@ -223,11 +226,9 @@ var albumTemplateRaw string = `
 			        return;
 			    }
 
-			    var clickedGallery = clickedListItem.parentNode.parentNode.parentNode.parentNode;
+			    var clickedGallery = clickedListItem.parentNode;
 
-			    var clickedDiv = clickedListItem.parentNode.parentNode.parentNode;
-
-				var index = parseInt(clickedDiv.getAttribute('data-index'));
+				var index = parseInt(clickedListItem.getAttribute('data-index'));
 
 			    if(index >= 0) {
 			        openPhotoSwipe( index, clickedGallery );
@@ -277,7 +278,7 @@ var albumTemplateRaw string = `
 
 			        getThumbBoundsFn: function(index) {
 			            // See Options->getThumbBoundsFn section of docs for more info
-			            var thumbnail = items[index].el.children[0].children[0].children[0].children[0],
+			            var thumbnail = items[index].el.children[0],
 			                pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
 			                rect = thumbnail.getBoundingClientRect();
 
@@ -289,7 +290,7 @@ var albumTemplateRaw string = `
 							captionEl.children[0].innerText = '';
 							return false;
 						}
-						captionEl.children[0].innerHTML = item.title +  '<br/><small>Photo: ' + item.author + '</small>';
+						captionEl.children[0].innerHTML = item.title +  '<br/>Full Size: <a href="' + item.src + '" download>Download</a>';
 						return true;
 			        },
 
@@ -385,15 +386,16 @@ var albumTemplateRaw string = `
 				});
 
 				gallery.listen('gettingData', function(index, item) {
-				    if( useLargeImages ) {
+					// TODO: handle medium size image correctly?
+				    //if( useLargeImages ) {
 				        item.src = item.o.src;
 				        item.w = item.o.w;
 				        item.h = item.o.h;
-				    } else {
-				        item.src = item.m.src;
-				        item.w = item.m.w;
-				        item.h = item.m.h;
-				    }
+				    //} else {
+				    //    item.src = item.m.src;
+				    //    item.w = item.m.w;
+				    //    item.h = item.m.h;
+				    //}
 				});
 
 			    gallery.init();
