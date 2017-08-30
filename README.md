@@ -84,16 +84,11 @@ You're done!
 Disqus identifies comment pages using a page identifier and/or a page url (see: https://help.disqus.com/customer/portal/articles/472098-javascript-configuration-variables). ssgallery uses an md5 hash of the original source image for the identifier, and does not bother to provide a url. This means as long as the source image is not modified, the comments should still show up correctly even if the filename or url changes. If you change domains after disqus comments have been entered, you may need to use the [Disqus migration tool](https://help.disqus.com/customer/portal/articles/286778-migration-tools) to move them.
 
 ## known issues / limitations
-- Thumbnail sizes other than 170x130 are not currently supported. Some changes to the CSS are required.
+- Full size image link is broken
 - There is no support for paging. Really large albums may not scale well since all thumbnails are on one page.
 - If you run ssgallery multiple times and remove some images in between runs, you will end up with extra files in your destination folder that aren't linked in the gallery but are still present. Over time this could grow and start wasting disk space (and you may want removed images to disappear completely from the published gallery). A simple workaround is to completely delete the target folder and re-generate from scratch as needed.
-- Occasionally File.Copy throws an IOException related to disk space even when plenty of space is available. Setting the following registry key may help:
-
-   HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\IRPStackSize DWORD 0x0000000f (15) 
 
 ## todo
-- refine gapless layout (no frills css approach?)
-- improve album thumbnail autogeneration (photo stack)
 - allow specifying sort options for albums/folders (including dictionary number sorting, and reverse option)
 - paging (specify max images per page, default ~100. url scheme?)
 - download gallery/album links and zip files
